@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>네온 브레이커 - 관리자</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="admin-header">
+      <div class="brand">
+        <h1>⚙️ 관리자 패널</h1>
+        <p>네온 브레이커</p>
+      </div>
+      <button class="btn btn-ghost" onclick="backToGame()">← 게임으로</button>
+    </div>
+
+    <div class="admin-container">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="basic">기본 설정</button>
+        <button class="admin-tab" data-tab="price">가격 설정</button>
+        <button class="admin-tab" data-tab="stage">스테이지</button>
+        <button class="admin-tab" data-tab="data">데이터 관리</button>
+        <button class="admin-tab" data-tab="stats">게임 통계</button>
+      </div>
+
+      <div class="admin-content">
+        <div id="adminContent"></div>
+      </div>
+    </div>
+
+    <div class="admin-footer">
+      <div class="status-bar">
+        <span id="lastSaved">마지막 저장: 없음</span>
+        <span id="connectionStatus">연결됨</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

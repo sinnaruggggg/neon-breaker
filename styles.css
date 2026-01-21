@@ -1,0 +1,202 @@
+/* 네온 브레이커 공통 스타일 */
+:root {
+  --primary: #00f0ff;
+  --secondary: #ff00aa;
+  --accent: #ffdd00;
+  --success: #00ff88;
+  --warning: #ff8800;
+  --danger: #ff4466;
+  --bg: #0a0a12;
+  --card: #12121f;
+  --card-light: #1a1a2f;
+  --text: #fff;
+  --text-dim: #7788aa;
+  --border: rgba(0, 240, 255, 0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* 공통 버튼 스타일 */
+.btn {
+  padding: 12px 20px;
+  margin: 4px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #0088aa);
+  color: #000;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 240, 255, 0.3);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--secondary), #aa0066);
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 0, 170, 0.3);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--accent), #aa8800);
+  color: #000;
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 220, 0, 0.3);
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-dim);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* 공통 카드 스타일 */
+.card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 10px 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 토스트 메시지 */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.92);
+  border: 1px solid var(--primary);
+  border-radius: 25px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  color: var(--primary);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 입력 필드 스타일 */
+input[type="number"], 
+input[type="text"],
+textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+input:focus, 
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px var(--primary); }
+  50% { box-shadow: 0 0 20px var(--primary); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .btn {
+    min-width: 80px;
+    font-size: 11px;
+    padding: 10px 16px;
+  }
+  
+  .card {
+    padding: 15px;
+    margin: 8px 0;
+  }
+  
+  .toast {
+    font-size: 11px;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    min-width: 70px;
+    font-size: 10px;
+    padding: 8px 12px;
+    margin: 2px;
+  }
+  
+  .card {
+    padding: 12px;
+    margin: 6px 0;
+  }
+}
