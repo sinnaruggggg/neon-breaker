@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>네온 브레이커</title>
+  
+  <!-- PWA 매니페스트 -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- 테마색 -->
+  <meta name="theme-color" content="#00f0ff">
+  
+  <!-- Apple PWA 설정 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="네온 브레이커">
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/icon-192x192.png">
+  
+  <!-- 폰트 -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <div id="app">
+    <header id="header">
+      <div class="hud-group">
+        <div class="hud-stat">
+          <span class="label">라운드</span>
+          <span class="value" id="hudRound">1-1</span>
+        </div>
+        <div class="hud-stat">
+          <span class="label">점수</span>
+          <span class="value" id="hudScore">0</span>
+        </div>
+      </div>
+      
+      <div class="hud-stat">
+        <span class="label">생명</span>
+        <div class="lives-bar" id="livesBar"></div>
+      </div>
+      
+      <div class="hud-group">
+        <div class="hud-stat">
+          <span class="value gold" id="hudCoins">0</span>
+          <span class="label">코인</span>
+        </div>
+        <button id="pauseBtn">❚❚</button>
+      </div>
+    </header>
+
+    <main id="gameArea">
+      <canvas id="gameCanvas"></canvas>
+      <div id="comboPopup"></div>
+      <div id="stagePopup"></div>
+    </main>
+
+    <section id="controls">
+      <div id="weaponInfo">
+        <div class="weapon-badge">
+          <span id="wpnIcon">🔫</span>
+          <span class="name" id="wpnName">기본</span>
+        </div>
+      </div>
+      
+      <div id="skillBar">
+        <button class="skill-btn" id="skillBtn1">
+          <span class="icon">💥</span>
+          <span class="label">폭탄</span>
+          <div class="cd-fill" id="cd1"></div>
+        </button>
+        <button class="skill-btn" id="skillBtn2">
+          <span class="icon">⚡</span>
+          <span class="label">번개</span>
+          <div class="cd-fill" id="cd2"></div>
+        </button>
+        <button class="skill-btn" id="skillBtn3">
+          <span class="icon">🔥</span>
+          <span class="label">화염</span>
+          <div class="cd-fill" id="cd3"></div>
+        </button>
+      </div>
+      
+      <div id="moveBar">
+        <button class="dir-btn" id="leftBtn">◀</button>
+        <button id="fireBtn">발사</button>
+        <button class="dir-btn" id="rightBtn">▶</button>
+      </div>
+    </section>
+
+    <!-- 화면들 -->
+    <div class="overlay" id="startScreen">
+      <div class="overlay-inner">
+        <div class="brand">
+          <h1>네온 브레이커</h1>
+          <p>아케이드 에디션</p>
+        </div>
+        <div class="coin-badge">
+          <span>🪙</span>
+          <span class="amount" id="menuCoins">0</span>
+        </div>
+        <button class="btn btn-primary" id="startBtn">게임 시작</button>
+        <button class="btn btn-gold" id="shopBtn">🛒 상점</button>
+        <button class="btn btn-ghost" id="adminBtn">⚙️ 관리자</button>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="gameOverScreen">
+      <div class="overlay-inner">
+        <div class="brand">
+          <h1>게임 오버</h1>
+        </div>
+        <div class="reward-card">
+          <div class="label">💰 획득</div>
+          <div class="amount">+<span id="earnedCoins">0</span></div>
+        </div>
+        <p style="color:var(--text-dim);margin:10px 0;">
+          최종 점수: <span id="finalScore" style="color:var(--primary);">0</span>
+        </p>
+        <button class="btn btn-secondary" id="continueBtn">📺 광고 보고 계속</button>
+        <button class="btn btn-ghost" id="menuBtn1">메인 메뉴</button>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="stageClearScreen">
+      <div class="overlay-inner">
+        <div class="brand">
+          <h1>스테이지 클리어!</h1>
+        </div>
+        <div class="reward-card" style="padding:14px;">
+          <div class="label">보상</div>
+          <div class="amount" style="font-size:28px;">+<span id="stageReward">0</span> 🪙</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="title">해금 진행도</span>
+            <span id="progressInfo">1/7</span>
+          </div>
+          <div class="card-body">
+            <canvas id="charCanvas"></canvas>
+          </div>
+          <div class="card-footer">
+            <div class="progress-track">
+              <div class="progress-bar" id="progressBar" style="width:14%;"></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="nextStageBtn">다음 스테이지 →</button>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="roundClearScreen">
+      <div class="overlay-inner">
+        <div class="brand">
+          <h1>🎉 라운드 클리어!</h1>
+          <p>라운드 <span id="clearedRound">1</span></p>
+        </div>
+        <div class="reward-card">
+          <div class="label">🏆 보너스</div>
+          <div class="amount">+<span id="roundBonus">500</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="title">✨ 해금 완료!</span>
+          </div>
+          <div class="card-body">
+            <canvas id="charCanvas2"></canvas>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="nextRoundBtn">다음 라운드 →</button>
+        <button class="btn btn-gold" id="shopBtn2">🛒 상점</button>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="shopScreen">
+      <div class="overlay-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:10px;">
+          <div class="brand" style="margin:0;">
+            <h1 style="font-size:22px;">상점</h1>
+          </div>
+          <div class="coin-badge" style="margin:0;">
+            <span>🪙</span>
+            <span class="amount" id="shopCoins">0</span>
+          </div>
+        </div>
+        
+        <div class="shop-tabs">
+          <button class="shop-tab active" data-tab="weapons">무기</button>
+          <button class="shop-tab" data-tab="skills">스킬</button>
+          <button class="shop-tab" data-tab="items">아이템</button>
+          <button class="shop-tab" data-tab="balls">공</button>
+        </div>
+        
+        <div class="shop-list" id="shopList"></div>
+        <button class="btn btn-ghost" id="closeShopBtn">← 뒤로</button>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="pauseScreen">
+      <div class="overlay-inner">
+        <div class="brand">
+          <h1>일시정지</h1>
+        </div>
+        <div class="coin-badge">
+          <span>🪙</span>
+          <span class="amount" id="pauseCoins">0</span>
+        </div>
+        <button class="btn btn-primary" id="resumeBtn">계속하기</button>
+        <button class="btn btn-gold" id="shopBtn3">🛒 상점</button>
+        <button class="btn btn-ghost" id="restartBtn">다시 시작</button>
+        <button class="btn btn-ghost" id="menuBtn2">메인 메뉴</button>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/input-handler.js"></script>
+  <script src="js/data/storage-manager.js"></script>
+  <script src="js/data/game-data.js"></script>
+  <script src="js/main.js"></script>
+  
+  <!-- 기존 게임 스크립트 (나중에 모듈화 예정) -->
+  <script>
+    // 기존 게임 로직 - 임시로 인라인 유지
+    // 나중에 완전히 모듈화될 예정
+    
+    window.onload = function() {
+      // 기존 게임 초기화 코드
+      console.log('🎮 기존 게임 로직 로드 중...');
+      
+      // 기존 코드가 있는지 확인
+      if (typeof initializeGame === 'undefined') {
+        loadOriginalGameScript();
+      }
+    };
+    
+    function loadOriginalGameScript() {
+      // 기존 게임 스크립트 동적 로드
+      const script = document.createElement('script');
+      script.innerHTML = `
+        // 여기에 기존 neon-breaker.html의 JavaScript 코드 추가
+        // 현재는 단순화된 버전으로 시작
+        
+        // 기본 변수들
+        var canvas, ctx, state = 'menu', score = 0, coins = 0, lives = 4, maxLives = 4;
+        var round = 1, stage = 1, charStage = 0, combo = 0, comboTimer, earned = 0;
+        var owned = { w_normal: true, b_white: true };
+        var equipped = { weapon: 'w_normal', ball: 'b_white' };
+        var buffs = {}, passives = {}, hasShield = false;
+        var speedLevel = 0, fireRateLevel = 0, bulletCount = 1;
+        var skillCD = [0, 0, 0], lastFire = 0;
+        var paddle, balls = [], bullets = [], bricks = [], items = [], fx = [], particles = [];
+        
+        // 기본 설정 (단순화)
+        var CFG = {
+          STAGES: 7,
+          CD: [8000, 10000, 12000],
+          FIRE_RATE: 1500,
+          PADDLE_SPD: 2.5,
+          DROP: 0.25
+        };
+        
+        // 게임 루프 (기본 구조)
+        function update() {
+          if (state !== 'playing') return;
+          
+          // 여기에 게임 업데이트 로직 추가
+          updateHUD();
+        }
+        
+        function render() {
+          if (state !== 'playing' && state !== 'paused') return;
+          
+          // 기본 렌더링
+          var bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+          bg.addColorStop(0, '#08080f');
+          bg.addColorStop(0.5, '#0e0e1a');
+          bg.addColorStop(1, '#08080f');
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        function updateHUD() {
+          document.getElementById('hudScore').textContent = score.toLocaleString();
+          document.getElementById('hudRound').textContent = round + '-' + stage;
+          document.getElementById('hudCoins').textContent = coins.toLocaleString();
+          
+          var h = '';
+          for (var i = 0; i < maxLives; i++) {
+            h += '<div class="heart ' + (i < lives ? '' : 'empty') + '"></div>';
+          }
+          document.getElementById('livesBar').innerHTML = h;
+        }
+        
+        function resize() {
+          var a = document.getElementById('gameArea');
+          if (canvas && a) {
+            canvas.width = a.clientWidth;
+            canvas.height = a.clientHeight;
+          }
+        }
+        
+        function loop() {
+          update();
+          render();
+          requestAnimationFrame(loop);
+        }
+        
+        // 초기화
+        setTimeout(() => {
+          canvas = document.getElementById('gameCanvas');
+          ctx = canvas.getContext('2d');
+          resize();
+          window.addEventListener('resize', resize);
+          updateHUD();
+          loop();
+        }, 100);
+        
+        console.log('✅ 기존 게임 로직 로드됨');
+      `;
+      
+      document.body.appendChild(script);
+    }
+  </script>
+</body>
+</html>

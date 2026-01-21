@@ -1,0 +1,470 @@
+/* 네온 브레이커 게임 UI 스타일 */
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #08080f 0%, #0f0f1a 50%, #08080f 100%);
+}
+
+/* 헤더 스타일 */
+#header {
+  height: 50px;
+  padding: 0 12px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hud-stat .label {
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+.hud-stat .value {
+  font-family: 'Orbitron';
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.hud-stat .value.gold {
+  color: var(--accent);
+}
+
+.lives-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.heart {
+  width: 14px;
+  height: 13px;
+  background: linear-gradient(135deg, #ff5577, #ff2255);
+  clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 50% 75%, 20% 100%, 0% 35%);
+}
+
+.heart.empty {
+  background: #333;
+}
+
+#pauseBtn {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 게임 영역 */
+#gameArea {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 팝업 텍스트 */
+#comboPopup,
+#stagePopup {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Orbitron';
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+#comboPopup {
+  top: 30%;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+#stagePopup {
+  top: 45%;
+  font-size: 20px;
+  color: var(--primary);
+}
+
+/* 컨트롤 영역 */
+#controls {
+  height: 170px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(15, 15, 25, 0.98), var(--bg));
+  border-top: 1px solid rgba(0, 240, 255, 0.15);
+}
+
+#weaponInfo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.weapon-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 16px;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 20px;
+}
+
+.weapon-badge .name {
+  font-family: 'Orbitron';
+  font-size: 11px;
+  color: var(--primary);
+}
+
+#skillBar {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.skill-btn {
+  width: 52px;
+  height: 52px;
+  background: var(--card);
+  border: 2px solid var(--secondary);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.skill-btn .icon {
+  font-size: 22px;
+}
+
+.skill-btn .label {
+  font-family: 'Orbitron';
+  font-size: 7px;
+  color: var(--secondary);
+}
+
+.skill-btn .cd-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.75);
+  height: 0%;
+}
+
+#moveBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5px;
+}
+
+.dir-btn {
+  width: 68px;
+  height: 68px;
+  background: var(--card);
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  color: var(--primary);
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#fireBtn {
+  width: 82px;
+  height: 82px;
+  background: linear-gradient(145deg, #ff0066, #bb0044);
+  border: 3px solid #ff4488;
+  border-radius: 50%;
+  font-family: 'Orbitron';
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+}
+
+/* 상점 관련 */
+.shop-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 5px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.shop-tab {
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.shop-tab.active {
+  background: var(--primary);
+  color: #000;
+}
+
+.shop-list {
+  width: 100%;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: var(--card);
+  border: 1px solid #2a2a40;
+  border-radius: 14px;
+  transition: all 0.3s ease;
+}
+
+.shop-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.shop-item.owned {
+  border-color: var(--success);
+}
+
+.shop-item.equipped {
+  border-color: var(--primary);
+}
+
+.shop-item .icon-box {
+  width: 52px;
+  height: 52px;
+  background: #1a1a2f;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-right: 14px;
+}
+
+.shop-item .info {
+  flex: 1;
+}
+
+.shop-item .name {
+  font-family: 'Orbitron';
+  font-size: 13px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.shop-item .desc {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.shop-btn {
+  padding: 10px 16px;
+  font-family: 'Orbitron';
+  font-size: 10px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.shop-btn-buy {
+  background: var(--accent);
+  color: #000;
+}
+
+.shop-btn-buy:disabled {
+  background: #333;
+  color: #666;
+}
+
+.shop-btn-equip {
+  background: var(--primary);
+  color: #000;
+}
+
+.shop-btn-equipped {
+  background: #2a2a40;
+  color: var(--text-dim);
+}
+
+/* 카드 컴포넌트 */
+.card {
+  width: 100%;
+  max-width: 300px;
+  background: var(--card);
+  border: 2px solid var(--secondary);
+  border-radius: 18px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.card-header {
+  padding: 12px 16px;
+  background: rgba(255, 0, 170, 0.1);
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-header .title {
+  font-family: 'Orbitron';
+  font-size: 11px;
+  color: var(--secondary);
+}
+
+.card-body canvas {
+  width: 100%;
+  height: 260px;
+  display: block;
+}
+
+.card-footer {
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.progress-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--secondary), var(--primary));
+  border-radius: 4px;
+}
+
+/* 보상 카드 */
+.reward-card {
+  width: 100%;
+  max-width: 280px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(255, 220, 0, 0.08);
+  border: 2px solid rgba(255, 220, 0, 0.35);
+  border-radius: 18px;
+  margin: 12px 0;
+}
+
+.reward-card .label {
+  font-family: 'Orbitron';
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.reward-card .amount {
+  font-family: 'Orbitron';
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+/* 반응형 게임 UI */
+@media (max-width: 768px) {
+  #controls {
+    height: 150px;
+  }
+  
+  .dir-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  #fireBtn {
+    width: 70px;
+    height: 70px;
+    font-size: 10px;
+  }
+  
+  .skill-btn {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .skill-btn .icon {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  #header {
+    height: 40px;
+    padding: 0 8px;
+  }
+  
+  .hud-stat .value {
+    font-size: 12px;
+  }
+  
+  #controls {
+    height: 130px;
+    padding: 8px 8px;
+  }
+  
+  .dir-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  #fireBtn {
+    width: 60px;
+    height: 60px;
+    font-size: 9px;
+  }
+  
+  .skill-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .skill-btn .icon {
+    font-size: 16px;
+  }
+}
