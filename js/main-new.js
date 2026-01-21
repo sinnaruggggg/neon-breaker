@@ -1,6 +1,6 @@
-// 네온 브레이커 새로운 메인 진입점 - 성능 최적화 버전
+// 네온 브레이커 메인 진입점 - 버그 수정 버전
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('🎮 네온 브레이커 2.0 시작 중...');
+  console.log('🎮 네온 브레이커 2.0 (버그 수정) 시작 중...');
   
   try {
     // 초기화 순서 - 성능 최적화 추가
@@ -20,6 +20,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     showError('게임 초기화에 실패했습니다. 페이지를 새로고침해주세요.');
   }
 });
+
+// 게임 콤보 시스템
+window.gameCombo = 0;
+window.gameComboTimer = null;
+
+// 콤보 증가
+function increaseCombo() {
+  window.gameCombo++;
+  
+  // 타이머 리셋
+  if (window.gameComboTimer) {
+    clearTimeout(window.gameComboTimer);
+  }
+  
+  // 콤보 UI 업데이트
+  if (window.elements && window.elements.comboPopup) {
+    const popup = window.elements.comboPopup;
+    if (window.gameCombo > 2) {
+      popup.textContent = `${window.gameCombo}연속!`;
+      popup.style.opacity = '1';
+      popup.style.transform = 'translateX(-50%) scale(1.2)';
+    }
+    
+    // 새 타이머 설정
+    window.gameComboTimer = setTimeout(() => {
+      resetGameCombo();
+    }, 2000);
+  }
+}
+
+// 콤보 리셋
+function resetGameCombo() {
+  window.gameCombo = 0;
+  if (window.gameComboTimer) {
+    clearTimeout(window.gameComboTimer);
+    window.gameComboTimer = null;
+  }
+  
+  // 콤보 UI 업데이트
+  if (window.elements && window.elements.comboPopup) {
+    const popup = window.elements.comboPopup;
+    popup.style.opacity = '0';
+    popup.style.transform = 'translateX(-50%) scale(1)';
+  }
+}
+
+// 콤보 UI 업데이트
+function updateComboUI() {
+  if (window.gameEngine && window.elements.comboPopup) {
+    window.gameEngine.combo = window.gameCombo;
+  }
+}
+
+// 스킬 쿨타임 표시
+function updateSkillCooldowns(engine) {
+  if (!window.elements) return;
+  
+  const skillCDs = window.gameEngine?.skillCDs || [0, 0, 0];
+  
+  skillCDs.forEach((cd, index) => {
+    const cdElement = document.getElementById(`cd${index + 1}`);
+    if (!cdElement) return;
+    
+    const now = Date.now();
+    const elapsed = now - cd;
+    const baseCooldowns = [8000, 10000, 12000];
+    const cdMultiplier = window.gameData?.hasBuff('cdDown') ? 0.8 : 1;
+    const duration = baseCooldowns[index] * cdMultiplier;
+    const remaining = Math.max(0, duration - elapsed);
+    
+    const percentage = remaining > 0 ? (remaining / duration) * 100 : 0;
+    cdElement.style.height = `${percentage}%`;
+  });
+}
 
 // 스토리지 초기화
 async function initializeStorage() {
@@ -52,6 +126,27 @@ async function initializeInput() {
   console.log('✅ 입력 시스템 초기화 완료');
 }
 
+// 성능 최적화 초기화
+async function initializePerformance() {
+  console.log('⚡ 성능 최적화 초기화 중...');
+  
+  // 성능 최적화 도구 생성
+  window.performanceOptimizer = new PerformanceOptimizer();
+  
+  // 기기에 맞는 최적화 레벨 설정
+  window.performanceOptimizer.optimizeForDevice();
+  
+  // 자동 최적화 활성화
+  window.performanceOptimizer.beginFrame();
+  
+  // 주기적 가비지 컬렉션
+  setInterval(() => {
+    window.performanceOptimizer.garbageCollect();
+  }, 30000); // 30초마다
+  
+  console.log('✅ 성능 최적화 초기화 완료');
+}
+
 // 게임 엔진 초기화
 async function initializeEngine() {
   console.log('🚀 게임 엔진 초기화 중...');
@@ -78,8 +173,7 @@ async function initializeEngine() {
 
 // 충돌 핸들러 설정
 function setupCollisionHandlers() {
-  const collisionSystem = window.gameEngine.systems.get('collision');
-  
+  const collisionSystem = window.gameEngine?.systems?.get('collision');
   if (!collisionSystem) return;
   
   // 공-패들 충돌
@@ -87,12 +181,14 @@ function setupCollisionHandlers() {
     const ball = collision.entity1;
     const paddle = collision.entity2;
     
-    if (ball.handlePaddleCollision) {
-      ball.handlePaddleCollision(paddle);
+    if (ball && paddle && ball.handlePaddleCollision) {
+      const hit = ball.handlePaddleCollision(paddle);
+      
+      if (hit) {
+        // 사운드 재생
+        Utils.playSound(330, 50);
+      }
     }
-    
-    // 사운드 재생
-    Utils.playSound(330, 50);
   });
   
   // 공-블록 충돌
@@ -100,37 +196,47 @@ function setupCollisionHandlers() {
     const ball = collision.entity1;
     const brick = collision.entity2;
     
-    // 블록 타격
-    const destroyed = brick.hit(1);
-    
-    if (destroyed) {
-      // 공 반사
-      if (collision.side === 'top' || collision.side === 'bottom') {
-        ball.dy = -ball.dy;
-      } else if (collision.side === 'left' || collision.side === 'right') {
-        ball.dx = -ball.dx;
+    if (ball && brick && brick.hit) {
+      // 블록 타격
+      const destroyed = brick.hit(1);
+      
+      if (destroyed) {
+        // 공 반사
+        if (collision.side === 'top' || collision.side === 'bottom') {
+          ball.dy = -ball.dy;
+        } else if (collision.side === 'left' || collision.side === 'right') {
+          ball.dx = -ball.dx;
+        }
+        
+        // 콤보 증가
+        increaseCombo();
+        
+        // 콤보 UI 업데이트
+        updateComboUI();
       }
+      
+      // 점수 및 보상 처리는 GameEngine에서 처리
     }
-    
-    // 콤보 증가
-    updateCombo();
   });
   
   // 공-벽 충돌
   collisionSystem.addCollisionHandler('ball', 'wall', (collision) => {
     const ball = collision.entity1;
     
-    if (collision.side === 'left' || collision.side === 'right') {
-      ball.dx = -ball.dx;
-    } else if (collision.side === 'top') {
-      ball.dy = -ball.dy;
+    if (ball) {
+      if (collision.side === 'left' || collision.side === 'right') {
+        ball.dx = -ball.dx;
+      } else if (collision.side === 'top') {
+        ball.dy = -ball.dy;
+      }
+      
+      // 콤보 리셋
+      resetGameCombo();
+      updateComboUI();
+      
+      // 사운드 재생
+      Utils.playSound(220, 30);
     }
-    
-    // 콤보 리셋
-    resetCombo();
-    
-    // 사운드 재생
-    Utils.playSound(220, 30);
   });
   
   // 아이템-패들 충돌
@@ -138,13 +244,13 @@ function setupCollisionHandlers() {
     const item = collision.entity1;
     const paddle = collision.entity2;
     
-    if (item.collect) {
+    if (item && paddle && item.collect) {
       item.collect(paddle);
+      
+      // 사운드 재생
+      Utils.playSound(550, 100);
+      Utils.vibrate([50]);
     }
-    
-    // 아이템 효과
-    Utils.playSound(550, 100);
-    Utils.vibrate([50]);
   });
 }
 
@@ -487,6 +593,9 @@ function startGame() {
     const playerData = window.gameData.getPlayerData();
     window.gameEngine.maxLives = playerData.maxLives;
     window.gameEngine.score = playerData.totalScore;
+    
+    // 기존 데이터 연동
+    window.gameEngine.skillCDs = window.gameEngine.skillCDs || [0, 0, 0];
   }
 }
 
@@ -504,7 +613,52 @@ function togglePause() {
 
 function useSkill(skillNumber) {
   console.log(`Skill ${skillNumber} used`);
-  // 스킬 구현은 추후
+  
+  if (!window.gameEngine) return;
+  
+  // 스킬 사용은 추후 구현
+  const skillCDs = window.gameEngine.skillCDs || [0, 0, 0];
+  const baseCooldowns = [8000, 10000, 12000];
+  const cdMultiplier = window.gameData?.hasBuff('cdDown') ? 0.8 : 1;
+  
+  // 스킬 쿨타임 설정
+  const now = Date.now();
+  skillCDs[skillNumber - 1] = now - (baseCooldowns[skillNumber - 1] * cdMultiplier * 0.5); // 기본 대기 시간의 50%만 기다림
+  
+  // 스킬 효과는 추후 EffectsRenderer에서 처리
+  const effectsRenderer = window.gameEngine?.renderers?.get('effects');
+  if (effectsRenderer) {
+    switch (skillNumber) {
+      case 1: // 폭탄
+        effectsRenderer.createExplosion(
+          window.gameEngine.canvas.width / 2,
+          window.gameEngine.canvas.height / 3,
+          2
+        );
+        break;
+      case 2: // 번개
+        // 모든 블록에 번개
+        const bricks = window.gameEngine.getEntitiesByType('brick');
+        bricks.forEach((brick, index) => {
+          if (index % 3 === 0) { // 3개 블록마다 번개
+            effectsRenderer.createLightning(
+              brick.x + brick.width / 2,
+              brick.y + brick.height / 2,
+              brick.x + brick.width / 2,
+              window.gameEngine.canvas.height / 2
+            );
+          }
+        });
+        break;
+      case 3: // 화염
+        const balls = window.gameEngine.getEntitiesByType('ball');
+        balls.forEach(ball => {
+          effectsRenderer.createFlash('#ff6600', 1000);
+          ball.setPiercing(5000, 10); // 5초간 관통, 반지름 10으로 증가
+        });
+        break;
+    }
+  }
 }
 
 // 화면 표시 함수들
@@ -541,58 +695,6 @@ function showRoundClearScreen() {
     window.elements.roundBonus.textContent = bonus;
     window.gameData.addCoins(bonus);
   }
-}
-
-// 콤보 시스템
-let combo = 0;
-let comboTimer = null;
-
-function updateCombo() {
-  combo++;
-  
-  // 타이머 리셋
-  if (comboTimer) {
-    clearTimeout(comboTimer);
-  }
-  
-  comboTimer = setTimeout(() => {
-    combo = 0;
-  }, 2000);
-  
-  // 콤보 UI 업데이트
-  if (window.gameEngine) {
-    window.gameEngine.combo = combo;
-  }
-}
-
-function resetCombo() {
-  combo = 0;
-  
-  if (comboTimer) {
-    clearTimeout(comboTimer);
-    comboTimer = null;
-  }
-  
-  if (window.gameEngine) {
-    window.gameEngine.combo = 0;
-  }
-}
-
-// 키보드 입력 처리
-function handleKeyDown(e) {
-  if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
-    togglePause();
-  }
-  
-  if (window.gameEngine?.state === 'playing') {
-    if (e.key === '1') useSkill(1);
-    if (e.key === '2') useSkill(2);
-    if (e.key === '3') useSkill(3);
-  }
-}
-
-function handleKeyUp(e) {
-  // 키 업 처리
 }
 
 // 토스트 메시지
@@ -747,5 +849,5 @@ setTimeout(() => {
 }, 100);
 
 // 디버깅 정보
-console.log('🎮 네온 브레이커 2.0 초기화 시스템 로드됨');
+console.log('🎮 네온 브레이커 2.0 (버그 수정) 초기화 시스템 로드됨');
 console.log('📊 스토리지 상태:', window.storageManager?.checkStorageSpace());

@@ -45,10 +45,10 @@ class GameEngine {
   // 시스템 초기화
   initializeSystems() {
     // 렌더러 시스템
+    // 렌더러 시스템
     this.renderers.set('background', new BackgroundRenderer(this.ctx, this.canvas));
     this.renderers.set('game', new GameRenderer(this.ctx, this.canvas));
     this.renderers.set('ui', new UIRenderer(this.ctx, this.canvas));
-    this.renderers.set('effects', new EffectsRenderer(this.ctx, this.canvas));
     
     // 엔티티 시스템
     this.systems.set('physics', new PhysicsSystem());
