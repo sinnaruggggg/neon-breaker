@@ -4,341 +4,671 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>네온 브레이커</title>
-  
-  <!-- PWA 매니페스트 -->
-  <link rel="manifest" href="manifest.json">
-  
-  <!-- 테마색 -->
-  <meta name="theme-color" content="#00f0ff">
-  
-  <!-- Apple PWA 설정 -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="네온 브레이커">
-  <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/icon-192x192.png">
-  
-  <!-- 폰트 -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-  
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/game.css">
+  <style>
+    :root{--primary:#00f0ff;--secondary:#ff00aa;--accent:#ffdd00;--success:#00ff88;--bg:#0a0a12;--card:#12121f;--card-light:#1a1a2f;--text:#fff;--text-dim:#7788aa}
+    *{margin:0;padding:0;box-sizing:border-box;user-select:none}
+    html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);touch-action:none}
+    #app{width:100%;height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#08080f 0%,#0f0f1a 50%,#08080f 100%)}
+    #header{height:50px;padding:0 12px;background:linear-gradient(180deg,rgba(0,0,0,0.9),transparent);display:flex;align-items:center;justify-content:space-between}
+    .hud-group{display:flex;align-items:center;gap:16px}
+    .hud-stat{display:flex;flex-direction:column;align-items:center}
+    .hud-stat .label{font-size:9px;color:var(--text-dim)}
+    .hud-stat .value{font-family:'Orbitron';font-size:15px;font-weight:700;color:var(--primary)}
+    .hud-stat .value.gold{color:var(--accent)}
+    .lives-bar{display:flex;gap:4px}
+    .heart{width:14px;height:13px;background:linear-gradient(135deg,#ff5577,#ff2255);clip-path:polygon(50% 0%,100% 35%,80% 100%,50% 75%,20% 100%,0% 35%)}
+    .heart.empty{background:#333}
+    #pauseBtn{width:42px;height:42px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.15);border-radius:12px;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center}
+    #gameArea{flex:1;position:relative;overflow:hidden}
+    #gameCanvas{width:100%;height:100%;display:block}
+    #comboPopup,#stagePopup{position:absolute;left:50%;transform:translateX(-50%);font-family:'Orbitron';pointer-events:none;opacity:0;transition:all 0.3s}
+    #comboPopup{top:30%;font-size:28px;font-weight:900;color:var(--accent)}
+    #stagePopup{top:45%;font-size:20px;color:var(--primary)}
+    #controls{height:170px;padding:10px 12px;background:linear-gradient(180deg,rgba(15,15,25,0.98),var(--bg));border-top:1px solid rgba(0,240,255,0.15)}
+    #weaponInfo{display:flex;justify-content:center;margin-bottom:8px}
+    .weapon-badge{display:flex;align-items:center;gap:8px;padding:5px 16px;background:rgba(0,240,255,0.1);border:1px solid rgba(0,240,255,0.25);border-radius:20px}
+    .weapon-badge .name{font-family:'Orbitron';font-size:11px;color:var(--primary)}
+    #skillBar{display:flex;justify-content:center;gap:14px;margin-bottom:10px}
+    .skill-btn{width:52px;height:52px;background:var(--card);border:2px solid var(--secondary);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .skill-btn .icon{font-size:22px}
+    .skill-btn .label{font-family:'Orbitron';font-size:7px;color:var(--secondary)}
+    .skill-btn .cd-fill{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.75);height:0%}
+    #moveBar{display:flex;justify-content:space-between;align-items:center;padding:0 5px}
+    .dir-btn{width:68px;height:68px;background:var(--card);border:2px solid var(--primary);border-radius:50%;color:var(--primary);font-size:28px;display:flex;align-items:center;justify-content:center}
+    #fireBtn{width:82px;height:82px;background:linear-gradient(145deg,#ff0066,#bb0044);border:3px solid #ff4488;border-radius:50%;font-family:'Orbitron';font-size:12px;font-weight:900;color:#fff}
+    .overlay{position:absolute;inset:0;background:rgba(5,5,12,0.97);display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;z-index:100}
+    .overlay.hidden{display:none}
+    .overlay-inner{width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center}
+    .brand{margin:25px 0 15px;text-align:center}
+    .brand h1{font-family:'Orbitron';font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .brand p{font-size:11px;color:var(--text-dim);letter-spacing:6px}
+    .coin-badge{display:inline-flex;align-items:center;gap:10px;padding:10px 24px;background:rgba(255,220,0,0.1);border:1px solid rgba(255,220,0,0.3);border-radius:30px;margin:12px 0}
+    .coin-badge .amount{font-family:'Orbitron';font-size:20px;font-weight:700;color:var(--accent)}
+    .btn{width:100%;max-width:280px;padding:16px 24px;margin:6px 0;font-family:'Orbitron';font-size:13px;font-weight:700;border:none;border-radius:14px;cursor:pointer}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),#0088aa);color:#000}
+    .btn-secondary{background:linear-gradient(135deg,var(--secondary),#aa0066);color:#fff}
+    .btn-gold{background:linear-gradient(135deg,var(--accent),#aa8800);color:#000}
+    .btn-ghost{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);color:var(--text-dim)}
+    .card{width:100%;max-width:300px;background:var(--card);border:2px solid var(--secondary);border-radius:18px;overflow:hidden;margin:12px 0}
+    .card-header{padding:12px 16px;background:rgba(255,0,170,0.1);display:flex;justify-content:space-between}
+    .card-header .title{font-family:'Orbitron';font-size:11px;color:var(--secondary)}
+    .card-body canvas{width:100%;height:260px;display:block}
+    .card-footer{padding:14px;background:rgba(0,0,0,0.25)}
+    .progress-track{height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden}
+    .progress-bar{height:100%;background:linear-gradient(90deg,var(--secondary),var(--primary));border-radius:4px}
+    .reward-card{width:100%;max-width:280px;padding:24px;text-align:center;background:rgba(255,220,0,0.08);border:2px solid rgba(255,220,0,0.35);border-radius:18px;margin:12px 0}
+    .reward-card .label{font-family:'Orbitron';font-size:12px;color:var(--accent);margin-bottom:8px}
+    .reward-card .amount{font-family:'Orbitron';font-size:36px;font-weight:900;color:var(--accent)}
+    .shop-tabs{display:flex;gap:6px;background:rgba(0,0,0,0.3);padding:5px;border-radius:12px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+    .shop-tab{padding:10px 14px;background:transparent;border:none;border-radius:8px;font-size:12px;font-weight:700;color:var(--text-dim);cursor:pointer}
+    .shop-tab.active{background:var(--primary);color:#000}
+    .shop-list{width:100%;max-height:340px;overflow-y:auto}
+    .shop-item{display:flex;align-items:center;padding:14px;margin-bottom:10px;background:var(--card);border:1px solid #2a2a40;border-radius:14px}
+    .shop-item.owned{border-color:var(--success)}
+    .shop-item.equipped{border-color:var(--primary)}
+    .shop-item .icon-box{width:52px;height:52px;background:#1a1a2f;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-right:14px}
+    .shop-item .info{flex:1}
+    .shop-item .name{font-family:'Orbitron';font-size:13px;color:#fff;margin-bottom:4px}
+    .shop-item .desc{font-size:11px;color:var(--text-dim)}
+    .shop-btn{padding:10px 16px;font-family:'Orbitron';font-size:10px;font-weight:700;border:none;border-radius:10px;cursor:pointer}
+    .shop-btn-buy{background:var(--accent);color:#000}
+    .shop-btn-buy:disabled{background:#333;color:#666}
+    .shop-btn-equip{background:var(--primary);color:#000}
+    .shop-btn-equipped{background:#2a2a40;color:var(--text-dim)}
+    .admin-box{width:100%;max-width:340px;background:linear-gradient(145deg,#1a0808,#120505);border:2px solid #ff3355;border-radius:16px;padding:16px;margin-bottom:14px}
+    .admin-box h3{font-family:'Orbitron';font-size:11px;color:#ff4466;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid rgba(255,68,102,0.25)}
+    .admin-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .admin-row label{font-size:13px;color:#aa8888}
+    .admin-input{width:80px;padding:8px;background:#0a0505;border:1px solid #442222;border-radius:10px;font-family:'Orbitron';font-size:12px;color:#fff;text-align:center}
+    .admin-btn{padding:8px 12px;margin:3px;background:#330a0a;border:1px solid #ff4466;border-radius:10px;font-family:'Orbitron';font-size:9px;color:#ff4466;cursor:pointer}
+    .admin-btn.green{border-color:#00ff88;color:#00ff88}
+    .admin-btn.blue{border-color:#00f0ff;color:#00f0ff}
+    .admin-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+    .admin-tab{padding:8px 12px;background:rgba(255,68,102,0.1);border:1px solid #442222;border-radius:8px;font-size:10px;color:#aa6666;cursor:pointer}
+    .admin-tab.active{background:#ff4466;color:#000;border-color:#ff4466}
+    .admin-list{max-height:200px;overflow-y:auto;margin-bottom:10px}
+    .admin-item{display:flex;align-items:center;justify-content:space-between;padding:8px;margin-bottom:6px;background:rgba(0,0,0,0.3);border-radius:8px;font-size:11px}
+    .admin-item .name{color:#fff;flex:1}
+    .stage-item{display:flex;align-items:center;gap:6px;padding:8px;margin-bottom:6px;background:rgba(0,0,0,0.3);border-radius:8px;font-size:10px}
+    .stage-item label{color:#aa8888;min-width:30px}
+    .stage-item input{width:42px;padding:5px;background:#0a0505;border:1px solid #442222;border-radius:6px;color:#fff;text-align:center;font-size:10px}
+    #toast{position:fixed;bottom:200px;left:50%;transform:translateX(-50%) translateY(50px);padding:14px 28px;background:rgba(0,0,0,0.92);border:1px solid var(--primary);border-radius:30px;font-family:'Orbitron';font-size:12px;color:var(--primary);opacity:0;transition:all 0.3s;z-index:999;pointer-events:none}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:340px;margin:15px 0}
+    .char-card{background:var(--card);border:2px solid #2a2a40;border-radius:14px;padding:8px;text-align:center;cursor:pointer;transition:all 0.2s}
+    .char-card:hover{border-color:var(--primary);transform:scale(1.02)}
+    .char-card.selected{border-color:var(--secondary);box-shadow:0 0 20px rgba(255,0,170,0.3)}
+    .char-card.locked{opacity:0.5;cursor:not-allowed}
+    .char-card canvas{width:100%;height:100px;display:block;border-radius:8px;margin-bottom:6px}
+    .char-card .char-name{font-family:'Orbitron';font-size:10px;color:var(--text-dim)}
+    .char-card .char-round{font-family:'Orbitron';font-size:8px;color:var(--secondary);margin-top:2px}
+    .char-card.locked .char-name{color:#555}
+  </style>
 </head>
 <body>
   <div id="app">
-    <header id="header">
+    <div id="header">
       <div class="hud-group">
-        <div class="hud-stat">
-          <span class="label">라운드</span>
-          <span class="value" id="hudRound">1-1</span>
-        </div>
-        <div class="hud-stat">
-          <span class="label">점수</span>
-          <span class="value" id="hudScore">0</span>
-        </div>
+        <div class="hud-stat"><span class="label">라운드</span><span class="value" id="hudRound">1-1</span></div>
+        <div class="hud-stat"><span class="label">점수</span><span class="value" id="hudScore">0</span></div>
       </div>
-      
-      <div class="hud-stat">
-        <span class="label">생명</span>
-        <div class="lives-bar" id="livesBar"></div>
-      </div>
-      
+      <div class="hud-stat"><span class="label">생명</span><div class="lives-bar" id="livesBar"></div></div>
       <div class="hud-group">
-        <div class="hud-stat">
-          <span class="value gold" id="hudCoins">0</span>
-          <span class="label">코인</span>
-        </div>
+        <div class="hud-stat"><span class="value gold" id="hudCoins">0</span><span class="label">코인</span></div>
         <button id="pauseBtn">❚❚</button>
       </div>
-    </header>
-
-    <main id="gameArea">
-      <canvas id="gameCanvas"></canvas>
-      <div id="comboPopup"></div>
-      <div id="stagePopup"></div>
-    </main>
-
-    <section id="controls">
-      <div id="weaponInfo">
-        <div class="weapon-badge">
-          <span id="wpnIcon">🔫</span>
-          <span class="name" id="wpnName">기본</span>
-        </div>
-      </div>
-      
+    </div>
+    <div id="gameArea"><canvas id="gameCanvas"></canvas><div id="comboPopup"></div><div id="stagePopup"></div></div>
+    <div id="controls">
+      <div id="weaponInfo"><div class="weapon-badge"><span id="wpnIcon">🔫</span><span class="name" id="wpnName">기본</span></div></div>
       <div id="skillBar">
-        <button class="skill-btn" id="skillBtn1">
-          <span class="icon">💥</span>
-          <span class="label">폭탄</span>
-          <div class="cd-fill" id="cd1"></div>
-        </button>
-        <button class="skill-btn" id="skillBtn2">
-          <span class="icon">⚡</span>
-          <span class="label">번개</span>
-          <div class="cd-fill" id="cd2"></div>
-        </button>
-        <button class="skill-btn" id="skillBtn3">
-          <span class="icon">🔥</span>
-          <span class="label">화염</span>
-          <div class="cd-fill" id="cd3"></div>
-        </button>
+        <button class="skill-btn" id="skillBtn1"><span class="icon">💥</span><span class="label">폭탄</span><div class="cd-fill" id="cd1"></div></button>
+        <button class="skill-btn" id="skillBtn2"><span class="icon">⚡</span><span class="label">번개</span><div class="cd-fill" id="cd2"></div></button>
+        <button class="skill-btn" id="skillBtn3"><span class="icon">🔥</span><span class="label">화염</span><div class="cd-fill" id="cd3"></div></button>
       </div>
-      
       <div id="moveBar">
         <button class="dir-btn" id="leftBtn">◀</button>
         <button id="fireBtn">발사</button>
         <button class="dir-btn" id="rightBtn">▶</button>
       </div>
-    </section>
-
-    <!-- 화면들 -->
-    <div class="overlay" id="startScreen">
-      <div class="overlay-inner">
-        <div class="brand">
-          <h1>네온 브레이커</h1>
-          <p>아케이드 에디션</p>
-        </div>
-        <div class="coin-badge">
-          <span>🪙</span>
-          <span class="amount" id="menuCoins">0</span>
-        </div>
-        <button class="btn btn-primary" id="startBtn">게임 시작</button>
-        <button class="btn btn-gold" id="shopBtn">🛒 상점</button>
-        <button class="btn btn-ghost" id="adminBtn">⚙️ 관리자</button>
-      </div>
     </div>
 
-    <div class="overlay hidden" id="gameOverScreen">
-      <div class="overlay-inner">
-        <div class="brand">
-          <h1>게임 오버</h1>
-        </div>
-        <div class="reward-card">
-          <div class="label">💰 획득</div>
-          <div class="amount">+<span id="earnedCoins">0</span></div>
-        </div>
-        <p style="color:var(--text-dim);margin:10px 0;">
-          최종 점수: <span id="finalScore" style="color:var(--primary);">0</span>
-        </p>
-        <button class="btn btn-secondary" id="continueBtn">📺 광고 보고 계속</button>
-        <button class="btn btn-ghost" id="menuBtn1">메인 메뉴</button>
-      </div>
-    </div>
+    <!-- Start Screen -->
+    <div class="overlay" id="startScreen"><div class="overlay-inner">
+      <div class="brand"><h1>네온 브레이커</h1><p>아케이드 에디션</p></div>
+      <div class="coin-badge"><span>🪙</span><span class="amount" id="menuCoins">0</span></div>
+      <button class="btn btn-primary" id="startBtn">게임 시작</button>
+      <button class="btn btn-gold" id="shopBtn">🛒 상점</button>
+      <button class="btn btn-ghost" id="adminBtn">⚙️ 관리자</button>
+    </div></div>
 
-    <div class="overlay hidden" id="stageClearScreen">
-      <div class="overlay-inner">
-        <div class="brand">
-          <h1>스테이지 클리어!</h1>
-        </div>
-        <div class="reward-card" style="padding:14px;">
-          <div class="label">보상</div>
-          <div class="amount" style="font-size:28px;">+<span id="stageReward">0</span> 🪙</div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="title">해금 진행도</span>
-            <span id="progressInfo">1/7</span>
-          </div>
-          <div class="card-body">
-            <canvas id="charCanvas"></canvas>
-          </div>
-          <div class="card-footer">
-            <div class="progress-track">
-              <div class="progress-bar" id="progressBar" style="width:14%;"></div>
-            </div>
-          </div>
-        </div>
-        <button class="btn btn-primary" id="nextStageBtn">다음 스테이지 →</button>
-      </div>
-    </div>
+    <!-- Character Select Screen -->
+    <div class="overlay hidden" id="charSelectScreen"><div class="overlay-inner">
+      <div class="brand"><h1 style="font-size:24px;">캐릭터 선택</h1><p>플레이할 캐릭터를 선택하세요</p></div>
+      <div class="char-grid" id="charGrid"></div>
+      <button class="btn btn-primary" id="playSelectedBtn">선택한 캐릭터로 시작</button>
+      <button class="btn btn-ghost" id="backToMenuBtn">← 뒤로</button>
+    </div></div>
 
-    <div class="overlay hidden" id="roundClearScreen">
-      <div class="overlay-inner">
-        <div class="brand">
-          <h1>🎉 라운드 클리어!</h1>
-          <p>라운드 <span id="clearedRound">1</span></p>
-        </div>
-        <div class="reward-card">
-          <div class="label">🏆 보너스</div>
-          <div class="amount">+<span id="roundBonus">500</span></div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="title">✨ 해금 완료!</span>
-          </div>
-          <div class="card-body">
-            <canvas id="charCanvas2"></canvas>
-          </div>
-        </div>
-        <button class="btn btn-primary" id="nextRoundBtn">다음 라운드 →</button>
-        <button class="btn btn-gold" id="shopBtn2">🛒 상점</button>
-      </div>
-    </div>
+    <!-- Game Over -->
+    <div class="overlay hidden" id="gameOverScreen"><div class="overlay-inner">
+      <div class="brand"><h1>게임 오버</h1></div>
+      <div class="reward-card"><div class="label">💰 획득</div><div class="amount">+<span id="earnedCoins">0</span></div></div>
+      <p style="color:var(--text-dim);margin:10px 0;">최종 점수: <span id="finalScore" style="color:var(--primary);">0</span></p>
+      <button class="btn btn-secondary" id="continueBtn">📺 광고 보고 계속</button>
+      <button class="btn btn-ghost" id="menuBtn1">메인 메뉴</button>
+    </div></div>
 
-    <div class="overlay hidden" id="shopScreen">
-      <div class="overlay-inner">
-        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:10px;">
-          <div class="brand" style="margin:0;">
-            <h1 style="font-size:22px;">상점</h1>
-          </div>
-          <div class="coin-badge" style="margin:0;">
-            <span>🪙</span>
-            <span class="amount" id="shopCoins">0</span>
-          </div>
-        </div>
-        
-        <div class="shop-tabs">
-          <button class="shop-tab active" data-tab="weapons">무기</button>
-          <button class="shop-tab" data-tab="skills">스킬</button>
-          <button class="shop-tab" data-tab="items">아이템</button>
-          <button class="shop-tab" data-tab="balls">공</button>
-        </div>
-        
-        <div class="shop-list" id="shopList"></div>
-        <button class="btn btn-ghost" id="closeShopBtn">← 뒤로</button>
-      </div>
-    </div>
+    <!-- Stage Clear -->
+    <div class="overlay hidden" id="stageClearScreen"><div class="overlay-inner">
+      <div class="brand"><h1>스테이지 클리어!</h1></div>
+      <div class="reward-card" style="padding:14px;"><div class="label">보상</div><div class="amount" style="font-size:28px;">+<span id="stageReward">0</span> 🪙</div></div>
+      <div class="card"><div class="card-header"><span class="title">해금 진행도</span><span id="progressInfo">1/7</span></div><div class="card-body"><canvas id="charCanvas"></canvas></div><div class="card-footer"><div class="progress-track"><div class="progress-bar" id="progressBar" style="width:14%;"></div></div></div></div>
+      <button class="btn btn-primary" id="nextStageBtn">다음 스테이지 →</button>
+    </div></div>
 
-    <div class="overlay hidden" id="pauseScreen">
-      <div class="overlay-inner">
-        <div class="brand">
-          <h1>일시정지</h1>
-        </div>
-        <div class="coin-badge">
-          <span>🪙</span>
-          <span class="amount" id="pauseCoins">0</span>
-        </div>
-        <button class="btn btn-primary" id="resumeBtn">계속하기</button>
-        <button class="btn btn-gold" id="shopBtn3">🛒 상점</button>
-        <button class="btn btn-ghost" id="restartBtn">다시 시작</button>
-        <button class="btn btn-ghost" id="menuBtn2">메인 메뉴</button>
+    <!-- Round Clear -->
+    <div class="overlay hidden" id="roundClearScreen"><div class="overlay-inner">
+      <div class="brand"><h1>🎉 라운드 클리어!</h1><p>라운드 <span id="clearedRound">1</span></p></div>
+      <div class="reward-card"><div class="label">🏆 보너스</div><div class="amount">+<span id="roundBonus">500</span></div></div>
+      <div class="card"><div class="card-header"><span class="title">✨ 해금 완료!</span></div><div class="card-body"><canvas id="charCanvas2"></canvas></div></div>
+      <button class="btn btn-primary" id="nextRoundBtn">다음 라운드 →</button>
+      <button class="btn btn-gold" id="shopBtn2">🛒 상점</button>
+    </div></div>
+
+    <!-- Shop -->
+    <div class="overlay hidden" id="shopScreen"><div class="overlay-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:10px;">
+        <div class="brand" style="margin:0;"><h1 style="font-size:22px;">상점</h1></div>
+        <div class="coin-badge" style="margin:0;"><span>🪙</span><span class="amount" id="shopCoins">0</span></div>
       </div>
-    </div>
+      <div class="shop-tabs">
+        <button class="shop-tab active" data-tab="weapons">무기</button>
+        <button class="shop-tab" data-tab="skills">스킬</button>
+        <button class="shop-tab" data-tab="items">아이템</button>
+        <button class="shop-tab" data-tab="balls">공</button>
+      </div>
+      <div class="shop-list" id="shopList"></div>
+      <button class="btn btn-ghost" id="closeShopBtn">← 뒤로</button>
+    </div></div>
+
+    <!-- Pause -->
+    <div class="overlay hidden" id="pauseScreen"><div class="overlay-inner">
+      <div class="brand"><h1>일시정지</h1></div>
+      <div class="coin-badge"><span>🪙</span><span class="amount" id="pauseCoins">0</span></div>
+      <button class="btn btn-primary" id="resumeBtn">계속하기</button>
+      <button class="btn btn-gold" id="shopBtn3">🛒 상점</button>
+      <button class="btn btn-ghost" id="restartBtn">다시 시작</button>
+      <button class="btn btn-ghost" id="menuBtn2">메인 메뉴</button>
+    </div></div>
+
+    <!-- Admin -->
+    <div class="overlay hidden" id="adminScreen"><div class="overlay-inner">
+      <div class="brand"><h1 style="font-size:20px;">⚙️ 관리자</h1></div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="basic">기본</button>
+        <button class="admin-tab" data-tab="price">가격설정</button>
+        <button class="admin-tab" data-tab="stage">스테이지</button>
+        <button class="admin-tab" data-tab="char">캐릭터</button>
+        <button class="admin-tab" data-tab="data">데이터</button>
+      </div>
+      <div id="adminContent"></div>
+      <button class="btn btn-ghost" id="closeAdminBtn">← 뒤로</button>
+    </div></div>
 
     <div id="toast"></div>
   </div>
 
-  <!-- JavaScript -->
-  <script src="js/utils/helpers.js"></script>
-  <script src="js/utils/input-handler.js"></script>
-  <script src="js/data/storage-manager.js"></script>
-  <script src="js/data/game-data.js"></script>
-  <script src="js/utils/performance-optimizer.js"></script>
-  <script src="js/utils/performance-init.js"></script>
-  <script src="js/core/entity.js"></script>
-  <script src="js/core/game-engine.js"></script>
-  <script src="js/entities/paddle.js"></script>
-  <script src="js/entities/ball.js"></script>
-  <script src="js/entities/brick.js"></script>
-  <script src="js/systems/renderers/background-renderer.js"></script>
-  <script src="js/systems/renderers/ui-renderer.js"></script>
-  <script src="js/systems/renderers/effects-renderer.js"></script>
-  <script src="js/systems/physics.js"></script>
-  <script src="js/systems/collision.js"></script>
-  <script src="js/main-new.js"></script>
-  
-  <!-- 기존 게임 스크립트 (나중에 모듈화 예정) -->
-  <script>
-    // 기존 게임 로직 - 임시로 인라인 유지
-    // 나중에 완전히 모듈화될 예정
+<script>
+var CFG={STAGES:7,CD:[8000,10000,12000],FIRE_RATE:1500,PADDLE_SPD:2.5,DROP:0.25};
+var STG={1:{r:3,c:5,s:3.2,str:0,exp:0.12},2:{r:3,c:6,s:3.5,str:0.05,exp:0.12},3:{r:4,c:6,s:3.8,str:0.08,exp:0.1},4:{r:4,c:6,s:4,str:0.1,exp:0.1},5:{r:4,c:7,s:4.2,str:0.12,exp:0.08},6:{r:5,c:7,s:4.5,str:0.15,exp:0.08},7:{r:5,c:7,s:4.8,str:0.18,exp:0.06}};
+
+// 캐릭터 데이터 - 각 라운드별 대표 캐릭터
+var CHARACTERS=[
+  {id:1,name:'미스터리 걸',desc:'신비로운 분위기',unlocked:true,hairColor:'#1a0a05',skinTone:'#fde4d8'},
+  {id:2,name:'선셋 뷰티',desc:'따뜻한 매력',unlocked:false,hairColor:'#8B4513',skinTone:'#f5d0c5'},
+  {id:3,name:'미드나잇',desc:'차가운 아름다움',unlocked:false,hairColor:'#1a1a3a',skinTone:'#f0e0d6'},
+  {id:4,name:'체리 블로섬',desc:'달콤한 유혹',unlocked:false,hairColor:'#ff6b9d',skinTone:'#ffe4d8'},
+  {id:5,name:'골든 스타',desc:'빛나는 존재감',unlocked:false,hairColor:'#daa520',skinTone:'#f5e0d0'},
+  {id:6,name:'실버 문',desc:'신비로운 광채',unlocked:false,hairColor:'#c0c0c0',skinTone:'#f8e8e0'}
+];
+
+var SHOP={
+  weapons:[{id:'w_normal',name:'기본',desc:'기본 발사',price:0,icon:'🔫'},{id:'w_spread',name:'확산',desc:'3방향 발사',price:500,icon:'💨',spread:true},{id:'w_laser',name:'레이저',desc:'관통 빔',price:800,icon:'⚡',laser:true},{id:'w_rapid',name:'속사',desc:'빠른 발사',price:1200,icon:'🔥',rate:0.4},{id:'w_missile',name:'미사일',desc:'유도탄',price:2000,icon:'🚀',homing:true}],
+  skills:[{id:'s_bomb',name:'폭탄+',desc:'더 큰 폭발',price:600,icon:'💥',buff:'bombUp'},{id:'s_bolt',name:'번개+',desc:'더 많은 번개',price:600,icon:'⚡',buff:'boltUp'},{id:'s_fire',name:'화염+',desc:'더 긴 지속',price:600,icon:'🔥',buff:'fireUp'},{id:'s_cd',name:'쿨타임',desc:'20% 빠른 충전',price:1500,icon:'⏱️',buff:'cdDown'},{id:'s_rate1',name:'연사+',desc:'빠른 발사',price:500,icon:'🔫',fireRate:1},{id:'s_rate2',name:'연사++',desc:'더 빠른 발사',price:1000,icon:'💨',fireRate:2},{id:'s_rate3',name:'연사MAX',desc:'최대 연사',price:2000,icon:'⚡',fireRate:3},{id:'s_bullet1',name:'탄환+',desc:'2발 발사',price:800,icon:'🎯',bulletCount:2},{id:'s_bullet2',name:'탄환++',desc:'3발 발사',price:1500,icon:'🎯',bulletCount:3},{id:'s_bullet3',name:'탄환MAX',desc:'5발 발사',price:3000,icon:'🎯',bulletCount:5}],
+  items:[{id:'i_magnet',name:'자석',desc:'자동 수집',price:1000,icon:'🧲',passive:'magnet'},{id:'i_shield',name:'보호막',desc:'추가 생명',price:800,icon:'🛡️',shield:true},{id:'i_double',name:'더블',desc:'2배 코인',price:2500,icon:'💎',passive:'double'},{id:'i_heart',name:'체력',desc:'+1 최대체력',price:1500,icon:'❤️',maxHp:true},{id:'i_speed1',name:'속도+',desc:'빠른 이동',price:600,icon:'👟',speedUp:1},{id:'i_speed2',name:'속도++',desc:'더 빠른 이동',price:1200,icon:'🚀',speedUp:2},{id:'i_speed3',name:'속도MAX',desc:'최대 속도',price:2000,icon:'⚡',speedUp:3}],
+  balls:[{id:'b_white',name:'기본',desc:'기본 공',price:0,icon:'⚪',color:'#fff'},{id:'b_fire',name:'화염',desc:'불꽃 효과',price:300,icon:'🔥',color:'#f60'},{id:'b_ice',name:'냉기',desc:'얼음 효과',price:300,icon:'❄️',color:'#0ff'},{id:'b_spark',name:'전기',desc:'전기 효과',price:500,icon:'⚡',color:'#ff0'},{id:'b_prism',name:'무지개',desc:'무지개 효과',price:1000,icon:'🌈',rainbow:true}]
+};
+
+var canvas,ctx,state='menu',score=0,coins=0,lives=4,maxLives=4,round=1,stage=1,charStage=0,combo=0,comboTimer,earned=0;
+var owned={w_normal:true,b_white:true},equipped={weapon:'w_normal',ball:'b_white'},buffs={},passives={},hasShield=false;
+var speedLevel=0,fireRateLevel=0,bulletCount=1,skillCD=[0,0,0],lastFire=0;
+var paddle,balls,bullets,bricks,items,fx,particles,input={left:false,right:false,fire:false};
+var currentTab='weapons',currentAdminTab='basic',returnTo='start';
+var selectedCharacter=1,unlockedChars=[1];
+
+window.onload=function(){load();canvas=document.getElementById('gameCanvas');ctx=canvas.getContext('2d');resize();window.addEventListener('resize',resize);setupInput();setupButtons();updateUI();requestAnimationFrame(loop);};
+
+function load(){
+  coins=parseInt(localStorage.getItem('nb_coins'))||0;
+  round=parseInt(localStorage.getItem('nb_round'))||1;
+  charStage=parseInt(localStorage.getItem('nb_char'))||0;
+  owned=JSON.parse(localStorage.getItem('nb_owned'))||{w_normal:true,b_white:true};
+  equipped=JSON.parse(localStorage.getItem('nb_equip'))||{weapon:'w_normal',ball:'b_white'};
+  buffs=JSON.parse(localStorage.getItem('nb_buffs'))||{};
+  passives=JSON.parse(localStorage.getItem('nb_pass'))||{};
+  maxLives=parseInt(localStorage.getItem('nb_maxhp'))||4;
+  speedLevel=parseInt(localStorage.getItem('nb_speed'))||0;
+  fireRateLevel=parseInt(localStorage.getItem('nb_firerate'))||0;
+  bulletCount=parseInt(localStorage.getItem('nb_bullets'))||1;
+  unlockedChars=JSON.parse(localStorage.getItem('nb_unlocked_chars'))||[1];
+  selectedCharacter=parseInt(localStorage.getItem('nb_selected_char'))||1;
+  var sp=JSON.parse(localStorage.getItem('nb_prices'));
+  if(sp){Object.keys(SHOP).forEach(function(cat){SHOP[cat].forEach(function(item){if(sp[item.id]!==undefined)item.price=sp[item.id];});});}
+  var ss=JSON.parse(localStorage.getItem('nb_stages'));
+  if(ss){STG=ss;CFG.STAGES=Object.keys(STG).length;}
+  var sc=JSON.parse(localStorage.getItem('nb_characters'));
+  if(sc){CHARACTERS=sc;}
+  // Update character unlock status
+  CHARACTERS.forEach(function(c){c.unlocked=unlockedChars.indexOf(c.id)!==-1;});
+}
+
+function save(){
+  localStorage.setItem('nb_coins',coins);localStorage.setItem('nb_round',round);localStorage.setItem('nb_char',charStage);
+  localStorage.setItem('nb_owned',JSON.stringify(owned));localStorage.setItem('nb_equip',JSON.stringify(equipped));
+  localStorage.setItem('nb_buffs',JSON.stringify(buffs));localStorage.setItem('nb_pass',JSON.stringify(passives));
+  localStorage.setItem('nb_maxhp',maxLives);localStorage.setItem('nb_speed',speedLevel);
+  localStorage.setItem('nb_firerate',fireRateLevel);localStorage.setItem('nb_bullets',bulletCount);
+  localStorage.setItem('nb_unlocked_chars',JSON.stringify(unlockedChars));
+  localStorage.setItem('nb_selected_char',selectedCharacter);
+}
+
+function savePrices(){var p={};Object.keys(SHOP).forEach(function(c){SHOP[c].forEach(function(i){p[i.id]=i.price;});});localStorage.setItem('nb_prices',JSON.stringify(p));}
+function saveStages(){localStorage.setItem('nb_stages',JSON.stringify(STG));CFG.STAGES=Object.keys(STG).length;}
+function saveCharacters(){localStorage.setItem('nb_characters',JSON.stringify(CHARACTERS));}
+function resize(){var a=document.getElementById('gameArea');canvas.width=a.clientWidth;canvas.height=a.clientHeight;if(paddle){paddle.y=canvas.height-28;paddle.x=Math.min(paddle.x,canvas.width-paddle.w);}}
+
+function setupButtons(){
+  document.getElementById('pauseBtn').onclick=togglePause;
+  document.getElementById('startBtn').onclick=showCharSelect;
+  document.getElementById('shopBtn').onclick=function(){returnTo='start';showShop();};
+  document.getElementById('adminBtn').onclick=function(){window.open('neon_admin.html','_blank');};
+  document.getElementById('continueBtn').onclick=continueWithAd;
+  document.getElementById('menuBtn1').onclick=showStartScreen;
+  document.getElementById('nextStageBtn').onclick=nextStage;
+  document.getElementById('nextRoundBtn').onclick=nextRound;
+  document.getElementById('shopBtn2').onclick=function(){returnTo='round';showShop();};
+  document.getElementById('closeShopBtn').onclick=closeShop;
+  document.getElementById('resumeBtn').onclick=togglePause;
+  document.getElementById('shopBtn3').onclick=function(){returnTo='pause';showShop();};
+  document.getElementById('restartBtn').onclick=restartGame;
+  document.getElementById('menuBtn2').onclick=showStartScreen;
+  document.getElementById('closeAdminBtn').onclick=closeAdmin;
+  document.getElementById('skillBtn1').onclick=function(){useSkill(1);};
+  document.getElementById('skillBtn2').onclick=function(){useSkill(2);};
+  document.getElementById('skillBtn3').onclick=function(){useSkill(3);};
+  document.getElementById('playSelectedBtn').onclick=startGame;
+  document.getElementById('backToMenuBtn').onclick=showStartScreen;
+  document.querySelectorAll('.shop-tab').forEach(function(t){t.onclick=function(){switchTab(t.dataset.tab);};});
+  document.querySelectorAll('.admin-tab').forEach(function(t){t.onclick=function(){switchAdminTab(t.dataset.tab);};});
+}
+
+function setupInput(){
+  var L=document.getElementById('leftBtn'),R=document.getElementById('rightBtn'),F=document.getElementById('fireBtn');
+  L.ontouchstart=function(e){e.preventDefault();input.left=true;};L.ontouchend=function(e){e.preventDefault();input.left=false;};
+  R.ontouchstart=function(e){e.preventDefault();input.right=true;};R.ontouchend=function(e){e.preventDefault();input.right=false;};
+  F.ontouchstart=function(e){e.preventDefault();input.fire=true;};F.ontouchend=function(e){e.preventDefault();input.fire=false;};
+  L.onmousedown=function(){input.left=true;};L.onmouseup=L.onmouseleave=function(){input.left=false;};
+  R.onmousedown=function(){input.right=true;};R.onmouseup=R.onmouseleave=function(){input.right=false;};
+  F.onmousedown=function(){input.fire=true;};F.onmouseup=F.onmouseleave=function(){input.fire=false;};
+  document.onkeydown=function(e){if(e.key==='ArrowLeft')input.left=true;if(e.key==='ArrowRight')input.right=true;if(e.key===' '||e.key==='z'){input.fire=true;e.preventDefault();}if(e.key>='1'&&e.key<='3')useSkill(parseInt(e.key));};
+  document.onkeyup=function(e){if(e.key==='ArrowLeft')input.left=false;if(e.key==='ArrowRight')input.right=false;if(e.key===' '||e.key==='z')input.fire=false;};
+}
+
+function updateUI(){
+  document.getElementById('menuCoins').textContent=coins.toLocaleString();
+  document.getElementById('shopCoins').textContent=coins.toLocaleString();
+  document.getElementById('pauseCoins').textContent=coins.toLocaleString();
+  document.getElementById('hudCoins').textContent=coins.toLocaleString();
+  var wpn=SHOP.weapons.find(function(w){return w.id===equipped.weapon;})||SHOP.weapons[0];
+  document.getElementById('wpnIcon').textContent=wpn.icon;
+  document.getElementById('wpnName').textContent=wpn.name;
+}
+
+function updateHUD(){
+  document.getElementById('hudScore').textContent=score.toLocaleString();
+  document.getElementById('hudRound').textContent=round+'-'+stage;
+  document.getElementById('hudCoins').textContent=coins.toLocaleString();
+  var h='';for(var i=0;i<maxLives;i++){h+='<div class="heart '+(i<lives?'':'empty')+'"></div>';}
+  document.getElementById('livesBar').innerHTML=h;
+}
+
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}
+function showCombo(t){var e=document.getElementById('comboPopup');e.textContent=t;e.style.opacity='1';e.style.transform='translateX(-50%) scale(1.2)';setTimeout(function(){e.style.opacity='0';e.style.transform='translateX(-50%) scale(1)';},400);}
+function showStageText(){var e=document.getElementById('stagePopup');e.textContent='라운드 '+round+' - 스테이지 '+stage;e.style.opacity='1';setTimeout(function(){e.style.opacity='0';},1500);}
+
+function showCharSelect(){
+  hideAll();
+  renderCharGrid();
+  document.getElementById('charSelectScreen').classList.remove('hidden');
+}
+
+function renderCharGrid(){
+  var grid=document.getElementById('charGrid');
+  grid.innerHTML='';
+  CHARACTERS.forEach(function(char){
+    var card=document.createElement('div');
+    card.className='char-card'+(char.unlocked?'':' locked')+(selectedCharacter===char.id?' selected':'');
     
-    window.onload = function() {
-      // 기존 게임 초기화 코드
-      console.log('🎮 기존 게임 로직 로드 중...');
-      
-      // 기존 코드가 있는지 확인
-      if (typeof initializeGame === 'undefined') {
-        loadOriginalGameScript();
-      }
-    };
+    // 서버 이미지 경로 체크
+    var imgPath='media/thumbs/char_'+char.id+'.jpg';
     
-    function loadOriginalGameScript() {
-      // 기존 게임 스크립트 동적 로드
-      const script = document.createElement('script');
-      script.innerHTML = `
-        // 여기에 기존 neon-breaker.html의 JavaScript 코드 추가
-        // 현재는 단순화된 버전으로 시작
-        
-        // 기본 변수들
-        var canvas, ctx, state = 'menu', score = 0, coins = 0, lives = 4, maxLives = 4;
-        var round = 1, stage = 1, charStage = 0, combo = 0, comboTimer, earned = 0;
-        var owned = { w_normal: true, b_white: true };
-        var equipped = { weapon: 'w_normal', ball: 'b_white' };
-        var buffs = {}, passives = {}, hasShield = false;
-        var speedLevel = 0, fireRateLevel = 0, bulletCount = 1;
-        var skillCD = [0, 0, 0], lastFire = 0;
-        var paddle, balls = [], bullets = [], bricks = [], items = [], fx = [], particles = [];
-        
-        // 기본 설정 (단순화)
-        var CFG = {
-          STAGES: 7,
-          CD: [8000, 10000, 12000],
-          FIRE_RATE: 1500,
-          PADDLE_SPD: 2.5,
-          DROP: 0.25
-        };
-        
-        // 게임 루프 (기본 구조)
-        function update() {
-          if (state !== 'playing') return;
-          
-          // 여기에 게임 업데이트 로직 추가
-          updateHUD();
-        }
-        
-        function render() {
-          if (state !== 'playing' && state !== 'paused') return;
-          
-          // 기본 렌더링
-          var bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-          bg.addColorStop(0, '#08080f');
-          bg.addColorStop(0.5, '#0e0e1a');
-          bg.addColorStop(1, '#08080f');
-          ctx.fillStyle = bg;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        
-        function updateHUD() {
-          document.getElementById('hudScore').textContent = score.toLocaleString();
-          document.getElementById('hudRound').textContent = round + '-' + stage;
-          document.getElementById('hudCoins').textContent = coins.toLocaleString();
-          
-          var h = '';
-          for (var i = 0; i < maxLives; i++) {
-            h += '<div class="heart ' + (i < lives ? '' : 'empty') + '"></div>';
-          }
-          document.getElementById('livesBar').innerHTML = h;
-        }
-        
-        function resize() {
-          var a = document.getElementById('gameArea');
-          if (canvas && a) {
-            canvas.width = a.clientWidth;
-            canvas.height = a.clientHeight;
-          }
-        }
-        
-        function loop() {
-          update();
-          render();
-          requestAnimationFrame(loop);
-        }
-        
-        // 초기화
-        setTimeout(() => {
-          canvas = document.getElementById('gameCanvas');
-          ctx = canvas.getContext('2d');
-          resize();
-          window.addEventListener('resize', resize);
-          updateHUD();
-          loop();
-        }, 100);
-        
-        console.log('✅ 기존 게임 로직 로드됨');
-      `;
-      
-      document.body.appendChild(script);
+    card.innerHTML='<div class="thumb-container" style="width:100%;height:100px;border-radius:8px;margin-bottom:6px;overflow:hidden;background:#1a1a2e;display:flex;align-items:center;justify-content:center;"><img src="'+imgPath+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" style="width:100%;height:100%;object-fit:cover;"><canvas id="charThumb'+char.id+'" width="100" height="100" style="display:none;"></canvas></div><div class="char-name">'+char.name+'</div><div class="char-round">'+(char.unlocked?'해금됨':'🔒 라운드 '+char.id+' 클리어')+'</div>';
+    
+    if(char.unlocked){
+      card.onclick=function(){
+        selectedCharacter=char.id;
+        save();
+        renderCharGrid();
+      };
     }
-  </script>
+    grid.appendChild(card);
+    
+    // 이미지 로드 실패시 캔버스 그리기
+    setTimeout(function(){
+      var cv=document.getElementById('charThumb'+char.id);
+      if(cv&&cv.style.display==='block'){
+        var thumbCtx=cv.getContext('2d');
+        drawCharWithStyle(thumbCtx,cv.width,cv.height,7,char);
+      }
+    },100);
+  });
+}
+
+function getSCfg(){
+  var ms=Object.keys(STG).length,sk=stage<=ms?stage:ms,b=STG[sk],bonus=(round-1)*0.15,esb=stage>ms?(stage-ms)*0.1:0;
+  return{r:Math.min(8,b.r+Math.floor(esb*2)),c:Math.min(9,b.c+Math.floor(esb)),s:Math.min(8,b.s+bonus+esb*0.3),str:Math.min(0.5,b.str+bonus*0.2+esb*0.05),exp:Math.max(0.02,b.exp-bonus*0.01)};
+}
+
+function initObj(){paddle={w:canvas.width*0.11,h:14,x:canvas.width/2-canvas.width*0.055,y:canvas.height-28};balls=[makeBall()];bullets=[];items=[];fx=[];particles=[];makeBricks();}
+
+function makeBall(x,y,dx,dy){
+  var cfg=getSCfg(),bd=SHOP.balls.find(function(b){return b.id===equipped.ball;})||SHOP.balls[0];
+  return{x:x!==undefined?x:canvas.width/2,y:y!==undefined?y:paddle.y-8,r:7,dx:dx!==undefined?dx:0,dy:dy!==undefined?dy:0,spd:cfg.s,attached:dx===undefined,piercing:false,pt:0,color:bd.color||'#fff',rainbow:bd.rainbow,trail:[]};
+}
+
+function makeBricks(){
+  bricks=[];var cfg=getSCfg(),pad=8,top=55,bw=(canvas.width-pad*2)/cfg.c-3,bh=20;
+  for(var r=0;r<cfg.r;r++){for(var c=0;c<cfg.c;c++){
+    var type='normal',hp=1,hue=(r*45+stage*35+round*20)%360,color='hsl('+hue+',70%,55%)';
+    if(Math.random()<cfg.str){type='strong';hp=2+Math.floor(round/2);color='#556';}
+    if(Math.random()<cfg.exp){type='bomb';hp=1;color='#f60';}
+    bricks.push({x:pad+c*(bw+3)+1.5,y:top+r*(bh+3),w:bw,h:bh,type:type,hp:hp,maxHp:hp,color:color,hue:hue});
+  }}
+}
+
+function update(){
+  if(state!=='playing')return;
+  var ps=CFG.PADDLE_SPD+(speedLevel*2);
+  if(input.left)paddle.x=Math.max(0,paddle.x-ps);
+  if(input.right)paddle.x=Math.min(canvas.width-paddle.w,paddle.x+ps);
+  if(input.fire){balls.forEach(function(b){if(b.attached){b.attached=false;b.dx=(Math.random()-0.5)*3;b.dy=-b.spd;}});fire();}
+  updateBalls();updateBullets();updateItems();updateFx();updateSkillCD();updateHUD();
+  if(bricks.length===0)stageClear();
+  if(balls.length===0){if(hasShield){hasShield=false;balls=[makeBall()];}else{lives--;if(lives<=0)gameOver();else balls=[makeBall()];}}
+}
+
+function updateBalls(){
+  for(var i=balls.length-1;i>=0;i--){
+    var b=balls[i];
+    if(b.attached){b.x=paddle.x+paddle.w/2;b.y=paddle.y-b.r;continue;}
+    if(b.rainbow)b.color='hsl('+(Date.now()/10%360)+',100%,60%)';
+    b.trail.push({x:b.x,y:b.y,c:b.color});if(b.trail.length>8)b.trail.shift();
+    b.x+=b.dx;b.y+=b.dy;
+    if(b.x<=b.r){b.x=b.r;b.dx=Math.abs(b.dx);}
+    if(b.x>=canvas.width-b.r){b.x=canvas.width-b.r;b.dx=-Math.abs(b.dx);}
+    if(b.y<=b.r){b.y=b.r;b.dy=Math.abs(b.dy);}
+    if(b.dy>0&&b.y+b.r>=paddle.y&&b.y-b.r<=paddle.y+paddle.h&&b.x>=paddle.x-b.r&&b.x<=paddle.x+paddle.w+b.r){
+      b.y=paddle.y-b.r;b.dy=-Math.abs(b.dy);b.dx=((b.x-paddle.x)/paddle.w-0.5)*b.spd*1.8;combo=0;
+    }
+    for(var j=bricks.length-1;j>=0;j--){
+      var br=bricks[j];
+      if(b.x+b.r>br.x&&b.x-b.r<br.x+br.w&&b.y+b.r>br.y&&b.y-b.r<br.y+br.h){
+        if(!b.piercing){var ox=Math.min(b.x+b.r-br.x,br.x+br.w-(b.x-b.r)),oy=Math.min(b.y+b.r-br.y,br.y+br.h-(b.y-b.r));if(ox<oy)b.dx*=-1;else b.dy*=-1;}
+        hitBrick(br,j);break;
+      }
+    }
+    if(b.pt>0){b.pt-=16;if(b.pt<=0){b.piercing=false;b.r=7;}}
+    if(b.y>canvas.height+10)balls.splice(i,1);
+  }
+}
+
+function fire(){
+  var now=Date.now(),wpn=SHOP.weapons.find(function(w){return w.id===equipped.weapon;})||SHOP.weapons[0];
+  var rm=1-(fireRateLevel*0.25),rate=CFG.FIRE_RATE*(wpn.rate||1)*rm;
+  if(now-lastFire<rate)return;lastFire=now;
+  var cx=paddle.x+paddle.w/2,cy=paddle.y;
+  if(wpn.spread){bullets.push({x:cx,y:cy,dx:-3,dy:-10,c:'#fd0'});bullets.push({x:cx,y:cy,dx:0,dy:-10,c:'#fd0'});bullets.push({x:cx,y:cy,dx:3,dy:-10,c:'#fd0'});}
+  else if(wpn.laser){bullets.push({x:cx,y:cy,dx:0,dy:-15,w:6,h:20,c:'#f0a',laser:true});}
+  else if(wpn.homing){bullets.push({x:cx,y:cy,dx:0,dy:-8,c:'#f60',homing:true});}
+  else{var sp=8,sx=cx-((bulletCount-1)*sp)/2;for(var i=0;i<bulletCount;i++){bullets.push({x:sx+(i*sp),y:cy,dx:0,dy:-12,c:'#0ff'});}}
+}
+
+function updateBullets(){
+  for(var i=bullets.length-1;i>=0;i--){
+    var b=bullets[i];
+    if(b.homing&&bricks.length>0){var t=bricks[0],a=Math.atan2(t.y+t.h/2-b.y,t.x+t.w/2-b.x);b.dx+=Math.cos(a)*0.5;b.dy+=Math.sin(a)*0.5;var s=Math.sqrt(b.dx*b.dx+b.dy*b.dy);if(s>10){b.dx=b.dx/s*10;b.dy=b.dy/s*10;}}
+    b.x+=b.dx||0;b.y+=b.dy;
+    if(b.y<-20||b.y>canvas.height||b.x<0||b.x>canvas.width){bullets.splice(i,1);continue;}
+    for(var j=bricks.length-1;j>=0;j--){
+      var br=bricks[j],bw=b.w||5,bh=b.h||5;
+      if(b.x+bw/2>br.x&&b.x-bw/2<br.x+br.w&&b.y+bh/2>br.y&&b.y-bh/2<br.y+br.h){hitBrick(br,j);if(!b.laser)bullets.splice(i,1);break;}
+    }
+  }
+}
+
+function hitBrick(br,idx){
+  br.hp--;for(var j=0;j<6;j++){particles.push({x:br.x+br.w/2,y:br.y+br.h/2,dx:(Math.random()-0.5)*6,dy:(Math.random()-0.5)*6,life:20,c:br.color,s:2+Math.random()*3});}
+  if(br.hp<=0)destroyBrick(br,idx);
+}
+
+function destroyBrick(br,idx){
+  var reward=Math.floor((5+round*2+stage)*(1+combo*0.05));
+  coins+=passives.double?reward*2:reward;earned+=reward;score+=Math.floor(10*(1+combo*0.1));combo++;
+  if(comboTimer)clearTimeout(comboTimer);comboTimer=setTimeout(function(){combo=0;},2000);
+  if(combo>2)showCombo(combo+'연속!');
+  if(br.type==='bomb'){
+    var range=buffs.bombUp?90:70;fx.push({x:br.x+br.w/2,y:br.y+br.h/2,r:0,max:range});
+    bricks.forEach(function(b,j){if(b===br)return;var d=Math.hypot(b.x+b.w/2-br.x-br.w/2,b.y+b.h/2-br.y-br.h/2);if(d<range){b.hp--;if(b.hp<=0)setTimeout(function(){destroyBrick(b,j);},30);}});
+  }
+  if(Math.random()<CFG.DROP)spawnItem(br.x+br.w/2,br.y+br.h/2);
+  var bi=bricks.indexOf(br);if(bi>-1)bricks.splice(bi,1);updateUI();
+}
+
+function spawnItem(x,y){var types=[{t:'life',i:'♥',c:'#f46'},{t:'multi',i:'M',c:'#0f8'},{t:'wide',i:'W',c:'#0ff'},{t:'coin',i:'🪙',c:'#fd0'}];var item=types[Math.floor(Math.random()*types.length)];items.push({x:x,y:y,t:item.t,i:item.i,c:item.c,dy:2.5});}
+
+function updateItems(){
+  for(var i=items.length-1;i>=0;i--){
+    var it=items[i];it.y+=it.dy;
+    if(passives.magnet){var dx=paddle.x+paddle.w/2-it.x,dy=paddle.y-it.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){it.x+=dx*0.08;it.y+=dy*0.08;}}
+    if(it.y+12>=paddle.y&&it.y-12<=paddle.y+paddle.h&&it.x>=paddle.x-12&&it.x<=paddle.x+paddle.w+12){collectItem(it);items.splice(i,1);continue;}
+    if(it.y>canvas.height+15)items.splice(i,1);
+  }
+}
+
+function collectItem(it){
+  showCombo(it.i+'!');
+  if(it.t==='life')lives=Math.min(lives+1,maxLives);
+  else if(it.t==='multi'){var nb=[];balls.forEach(function(b){if(!b.attached){nb.push(makeBall(b.x,b.y,b.dx+2,b.dy));nb.push(makeBall(b.x,b.y,b.dx-2,b.dy));}});balls=balls.concat(nb);}
+  else if(it.t==='wide')paddle.w=Math.min(paddle.w*1.2,canvas.width*0.25);
+  else if(it.t==='coin')coins+=50;
+  updateUI();
+}
+
+function updateFx(){for(var i=fx.length-1;i>=0;i--){fx[i].r+=8;if(fx[i].r>=fx[i].max)fx.splice(i,1);}for(var i=particles.length-1;i>=0;i--){particles[i].x+=particles[i].dx;particles[i].y+=particles[i].dy;particles[i].dy+=0.2;particles[i].life--;if(particles[i].life<=0)particles.splice(i,1);}}
+
+function useSkill(n){
+  if(state!=='playing')return;var now=Date.now(),cdMod=buffs.cdDown?0.8:1,cd=CFG.CD[n-1]*cdMod;
+  if(now-skillCD[n-1]<cd)return;skillCD[n-1]=now;showCombo('스킬!');
+  if(n===1){var range=buffs.bombUp?canvas.width*1.2:canvas.width;fx.push({x:canvas.width/2,y:canvas.height/3,r:0,max:range});for(var i=bricks.length-1;i>=0;i--){bricks[i].hp--;if(bricks[i].hp<=0)destroyBrick(bricks[i],i);}}
+  else if(n===2){var cnt=buffs.boltUp?6:4;for(var i=0;i<cnt;i++){var x=Math.random()*canvas.width;for(var j=0;j<10;j++){particles.push({x:x+(Math.random()-0.5)*15,y:j*(canvas.height/10),dx:0,dy:0,life:30,c:'#ff0',s:4,bolt:true});}for(var k=bricks.length-1;k>=0;k--){if(Math.abs(bricks[k].x+bricks[k].w/2-x)<35){bricks[k].hp--;if(bricks[k].hp<=0)destroyBrick(bricks[k],k);}}}}
+  else if(n===3){var dur=buffs.fireUp?7000:5000;balls.forEach(function(b){b.piercing=true;b.pt=dur;b.r=10;});}
+}
+
+function updateSkillCD(){var now=Date.now(),cdMod=buffs.cdDown?0.8:1;for(var i=0;i<3;i++){var el=document.getElementById('cd'+(i+1)),elapsed=now-skillCD[i],cd=CFG.CD[i]*cdMod;el.style.height=elapsed<cd?((cd-elapsed)/cd*100)+'%':'0%';}}
+
+function render(){
+  var bg=ctx.createLinearGradient(0,0,0,canvas.height);bg.addColorStop(0,'#08080f');bg.addColorStop(0.5,'#0e0e1a');bg.addColorStop(1,'#08080f');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle='rgba(0,240,255,0.03)';ctx.lineWidth=1;
+  for(var x=0;x<canvas.width;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+  for(var y=0;y<canvas.height;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+  if(state!=='playing'&&state!=='paused')return;
+  fx.forEach(function(e){var g=ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,e.r);g.addColorStop(0,'rgba(255,100,0,0.8)');g.addColorStop(0.5,'rgba(255,50,0,0.4)');g.addColorStop(1,'rgba(255,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();});
+  bricks.forEach(function(b){ctx.shadowBlur=8;ctx.shadowColor=b.color;ctx.fillStyle=b.color;ctx.beginPath();roundRect(ctx,b.x,b.y,b.w,b.h,4);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(b.x+3,b.y+3,b.w-6,4);if(b.type==='strong'&&b.hp>1){ctx.fillStyle='#fff';ctx.font='bold 10px Orbitron';ctx.textAlign='center';ctx.fillText(b.hp,b.x+b.w/2,b.y+b.h/2+4);}if(b.type==='bomb'){ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('💥',b.x+b.w/2,b.y+b.h/2+5);}ctx.shadowBlur=0;});
+  items.forEach(function(it){ctx.shadowBlur=15;ctx.shadowColor=it.c;ctx.fillStyle=it.c;ctx.beginPath();ctx.arc(it.x,it.y,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.i,it.x,it.y);ctx.shadowBlur=0;});
+  bullets.forEach(function(b){ctx.shadowBlur=10;ctx.shadowColor=b.c;ctx.fillStyle=b.c;if(b.laser){ctx.fillRect(b.x-b.w/2,b.y-b.h/2,b.w,b.h);}else{ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill();}ctx.shadowBlur=0;});
+  balls.forEach(function(ball){ball.trail.forEach(function(t,i){var a=(i/ball.trail.length)*0.4;ctx.fillStyle=rgba(t.c,a);ctx.beginPath();ctx.arc(t.x,t.y,ball.r*(i/ball.trail.length)*0.8,0,Math.PI*2);ctx.fill();});});
+  balls.forEach(function(b){ctx.shadowBlur=20;ctx.shadowColor=b.color;var g=ctx.createRadialGradient(b.x-b.r*0.3,b.y-b.r*0.3,0,b.x,b.y,b.r);g.addColorStop(0,'#fff');g.addColorStop(0.3,b.color);g.addColorStop(1,darken(b.color,50));ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;});
+  ctx.shadowBlur=20;ctx.shadowColor='#0ff';var pg=ctx.createLinearGradient(paddle.x,paddle.y,paddle.x,paddle.y+paddle.h);pg.addColorStop(0,'#0ff');pg.addColorStop(0.5,'#088');pg.addColorStop(1,'#044');ctx.fillStyle=pg;ctx.beginPath();roundRect(ctx,paddle.x,paddle.y,paddle.w,paddle.h,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();roundRect(ctx,paddle.x+4,paddle.y+2,paddle.w-8,4,2);ctx.fill();ctx.shadowBlur=0;
+  particles.forEach(function(p){ctx.globalAlpha=p.life/20;ctx.fillStyle=p.c;if(p.bolt){ctx.fillRect(p.x-2,p.y-10,4,20);}else{ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fill();}});ctx.globalAlpha=1;
+}
+
+function roundRect(ctx,x,y,w,h,r){ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function darken(c,amt){if(c.indexOf('hsl')===0)return c;var hex=c.replace('#','');if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];var r=Math.max(0,parseInt(hex.substr(0,2),16)-amt),g=Math.max(0,parseInt(hex.substr(2,2),16)-amt),b=Math.max(0,parseInt(hex.substr(4,2),16)-amt);return'rgb('+r+','+g+','+b+')';}
+function rgba(c,a){if(c.indexOf('hsl')===0)return c.replace(')',',' +a+')').replace('hsl','hsla');if(c.indexOf('rgb')===0)return c.replace(')',','+a+')').replace('rgb','rgba');var hex=c.replace('#','');if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);return'rgba('+r+','+g+','+b+','+a+')';}
+function loop(){update();render();requestAnimationFrame(loop);}
+
+function hideAll(){['startScreen','charSelectScreen','gameOverScreen','stageClearScreen','roundClearScreen','shopScreen','pauseScreen','adminScreen'].forEach(function(id){document.getElementById(id).classList.add('hidden');});}
+function startGame(){hideAll();score=0;lives=maxLives;stage=1;earned=0;combo=0;skillCD=[0,0,0];hasShield=owned.i_shield||false;round=selectedCharacter;initObj();showStageText();state='playing';}
+function stageClear(){
+  state='stageclear';var reward=50+stage*20+round*30;coins+=passives.double?reward*2:reward;if(charStage<CFG.STAGES)charStage++;
+  var char=CHARACTERS.find(function(c){return c.id===selectedCharacter;})||CHARACTERS[0];
+  var cv=document.getElementById('charCanvas');
+  if(cv){
+    var container=cv.parentElement;
+    // 서버 미디어 경로 체크 (jpg, png, gif, mp4, webm 순서로)
+    var basePath='media/stages/r'+round+'_s'+stage;
+    container.innerHTML='<img id="stageMedia" src="'+basePath+'.jpg" style="width:100%;height:260px;object-fit:contain;">';
+    var img=document.getElementById('stageMedia');
+    img.onerror=function(){
+      // jpg 실패시 png 시도
+      this.src=basePath+'.png';
+      this.onerror=function(){
+        // png 실패시 gif 시도
+        this.src=basePath+'.gif';
+        this.onerror=function(){
+          // gif 실패시 mp4 시도
+          container.innerHTML='<video src="'+basePath+'.mp4" style="width:100%;height:260px;object-fit:contain;" autoplay loop muted playsinline onerror="this.onerror=null;this.parentElement.innerHTML=\'<canvas id=stageCanvas width=300 height=260></canvas>\';var ctx=document.getElementById(\'stageCanvas\').getContext(\'2d\');drawCharWithStyle(ctx,300,260,'+charStage+',CHARACTERS.find(function(c){return c.id==='+selectedCharacter+'})||CHARACTERS[0]);"></video>';
+        };
+      };
+    };
+  }
+  document.getElementById('stageReward').textContent=passives.double?reward*2:reward;document.getElementById('progressInfo').textContent=charStage+'/'+CFG.STAGES;document.getElementById('progressBar').style.width=(charStage/CFG.STAGES*100)+'%';
+  save();updateUI();if(stage>=CFG.STAGES){setTimeout(roundClear,500);}else{document.getElementById('stageClearScreen').classList.remove('hidden');}
+}
+function nextStage(){hideAll();stage++;makeBricks();balls=[makeBall()];paddle.w=canvas.width*0.11;showStageText();state='playing';}
+function roundClear(){
+  hideAll();state='roundclear';var bonus=500+round*200;coins+=passives.double?bonus*2:bonus;
+  document.getElementById('clearedRound').textContent=round;document.getElementById('roundBonus').textContent=passives.double?bonus*2:bonus;
+  // Unlock next character
+  var nextCharId=round+1;
+  if(unlockedChars.indexOf(nextCharId)===-1&&nextCharId<=CHARACTERS.length){
+    unlockedChars.push(nextCharId);
+    CHARACTERS.forEach(function(c){c.unlocked=unlockedChars.indexOf(c.id)!==-1;});
+    toast('새 캐릭터 해금!');
+  }
+  var char=CHARACTERS.find(function(c){return c.id===selectedCharacter;})||CHARACTERS[0];
+  var cv2=document.getElementById('charCanvas2');if(cv2)drawCharWithStyle(cv2.getContext('2d'),cv2.width,cv2.height,CFG.STAGES,char);
+  round++;charStage=0;save();updateUI();document.getElementById('roundClearScreen').classList.remove('hidden');
+}
+function nextRound(){hideAll();stage=1;lives=maxLives;initObj();showStageText();state='playing';}
+function gameOver(){state='gameover';document.getElementById('finalScore').textContent=score.toLocaleString();document.getElementById('earnedCoins').textContent=earned.toLocaleString();save();document.getElementById('gameOverScreen').classList.remove('hidden');}
+function continueWithAd(){hideAll();lives=1;balls=[makeBall()];state='playing';}
+function restartGame(){hideAll();startGame();}
+function showStartScreen(){hideAll();updateUI();document.getElementById('startScreen').classList.remove('hidden');state='menu';}
+function togglePause(){if(state==='playing'){state='paused';updateUI();document.getElementById('pauseScreen').classList.remove('hidden');}else if(state==='paused'){hideAll();state='playing';}}
+function showShop(){hideAll();updateUI();renderShop();document.getElementById('shopScreen').classList.remove('hidden');}
+function closeShop(){document.getElementById('shopScreen').classList.add('hidden');if(returnTo==='pause')document.getElementById('pauseScreen').classList.remove('hidden');else if(returnTo==='round')document.getElementById('roundClearScreen').classList.remove('hidden');else document.getElementById('startScreen').classList.remove('hidden');}
+function switchTab(tab){currentTab=tab;document.querySelectorAll('.shop-tab').forEach(function(t){t.classList.toggle('active',t.dataset.tab===tab);});renderShop();}
+
+function renderShop(){
+  var list=document.getElementById('shopList'),items=SHOP[currentTab];
+  list.innerHTML=items.map(function(it){
+    var o=owned[it.id],eq=equipped.weapon===it.id||equipped.ball===it.id,canBuy=coins>=it.price&&!o,action='';
+    if(o&&(currentTab==='weapons'||currentTab==='balls')){action=eq?'<button class="shop-btn shop-btn-equipped" disabled>장착중</button>':'<button class="shop-btn shop-btn-equip" data-id="'+it.id+'">장착</button>';}
+    else if(o){action='<span style="color:#0f8;font-size:11px;">보유중</span>';}
+    else{action='<button class="shop-btn shop-btn-buy" data-id="'+it.id+'" '+(canBuy?'':'disabled')+'>🪙 '+it.price+'</button>';}
+    return'<div class="shop-item '+(o?'owned':'')+' '+(eq?'equipped':'')+'"><div class="icon-box">'+it.icon+'</div><div class="info"><div class="name">'+it.name+'</div><div class="desc">'+it.desc+'</div></div><div class="action">'+action+'</div></div>';
+  }).join('');
+  list.querySelectorAll('.shop-btn-buy').forEach(function(btn){btn.onclick=function(){buy(btn.dataset.id);};});
+  list.querySelectorAll('.shop-btn-equip').forEach(function(btn){btn.onclick=function(){equip(btn.dataset.id);};});
+}
+
+function buy(id){
+  var all=SHOP.weapons.concat(SHOP.skills).concat(SHOP.items).concat(SHOP.balls),it=all.find(function(i){return i.id===id;});
+  if(!it||coins<it.price||owned[id])return;coins-=it.price;owned[id]=true;
+  if(it.buff)buffs[it.buff]=true;if(it.passive)passives[it.passive]=true;if(it.maxHp)maxLives++;if(it.shield)hasShield=true;
+  if(it.speedUp)speedLevel=Math.max(speedLevel,it.speedUp);if(it.fireRate)fireRateLevel=Math.max(fireRateLevel,it.fireRate);if(it.bulletCount)bulletCount=Math.max(bulletCount,it.bulletCount);
+  save();updateUI();renderShop();toast('구매 완료!');
+}
+
+function equip(id){if(id.indexOf('w_')===0)equipped.weapon=id;else if(id.indexOf('b_')===0)equipped.ball=id;save();updateUI();renderShop();toast('장착 완료!');}
+
+function showAdmin(){hideAll();currentAdminTab='basic';renderAdminContent();document.querySelectorAll('.admin-tab').forEach(function(t){t.classList.toggle('active',t.dataset.tab==='basic');});document.getElementById('adminScreen').classList.remove('hidden');}
+function closeAdmin(){document.getElementById('adminScreen').classList.add('hidden');document.getElementById('startScreen').classList.remove('hidden');}
+function switchAdminTab(tab){currentAdminTab=tab;document.querySelectorAll('.admin-tab').forEach(function(t){t.classList.toggle('active',t.dataset.tab===tab);});renderAdminContent();}
+
+function renderAdminContent(){
+  var c=document.getElementById('adminContent');
+  if(currentAdminTab==='basic'){
+    c.innerHTML='<div class="admin-box"><h3>💰 코인</h3><div class="admin-row"><label>코인</label><input type="number" class="admin-input" id="adminCoins" value="'+coins+'"></div><div style="text-align:center;"><button class="admin-btn" id="add1kBtn">+1천</button><button class="admin-btn" id="add10kBtn">+1만</button><button class="admin-btn" id="setCoinsBtn">설정</button></div></div>';
+    document.getElementById('add1kBtn').onclick=function(){coins+=1000;document.getElementById('adminCoins').value=coins;save();updateUI();toast('+1,000 코인!');};
+    document.getElementById('add10kBtn').onclick=function(){coins+=10000;document.getElementById('adminCoins').value=coins;save();updateUI();toast('+10,000 코인!');};
+    document.getElementById('setCoinsBtn').onclick=function(){coins=parseInt(document.getElementById('adminCoins').value)||0;save();updateUI();toast('코인 설정됨!');};
+  }else if(currentAdminTab==='char'){
+    var h='<div class="admin-box"><h3>👤 캐릭터 관리</h3><div style="text-align:center;"><button class="admin-btn green" id="unlockAllCharsBtn">전체 캐릭터 해금</button></div></div>';
+    c.innerHTML=h;
+    document.getElementById('unlockAllCharsBtn').onclick=function(){
+      CHARACTERS.forEach(function(ch){ch.unlocked=true;if(unlockedChars.indexOf(ch.id)===-1)unlockedChars.push(ch.id);});
+      save();toast('전체 캐릭터 해금!');
+    };
+  }else if(currentAdminTab==='data'){
+    c.innerHTML='<div class="admin-box"><h3>🔓 데이터 관리</h3><div style="text-align:center;"><button class="admin-btn green" id="unlockAllBtn">전체 해금</button><button class="admin-btn" id="resetBtn">초기화</button></div></div>';
+    document.getElementById('unlockAllBtn').onclick=function(){Object.keys(SHOP).forEach(function(cat){SHOP[cat].forEach(function(it){owned[it.id]=true;});});buffs={bombUp:true,boltUp:true,fireUp:true,cdDown:true};passives={magnet:true,double:true};maxLives=6;speedLevel=3;fireRateLevel=3;bulletCount=5;CHARACTERS.forEach(function(ch){ch.unlocked=true;if(unlockedChars.indexOf(ch.id)===-1)unlockedChars.push(ch.id);});save();toast('전체 해금 완료!');};
+    document.getElementById('resetBtn').onclick=function(){if(confirm('모든 데이터를 초기화하시겠습니까?')){localStorage.clear();location.reload();}};
+  }else{
+    c.innerHTML='<div class="admin-box"><h3>준비 중</h3></div>';
+  }
+}
+
+function drawCharWithStyle(ctx,w,h,stageNum,charData){
+  var bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#1a1a2e');bg.addColorStop(0.5,'#16213e');bg.addColorStop(1,'#1a1a2e');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+  for(var i=0;i<15;i++){ctx.fillStyle='rgba(255,255,255,'+(Math.random()*0.3)+')';ctx.beginPath();ctx.arc(Math.random()*w,Math.random()*h,Math.random()*2,0,Math.PI*2);ctx.fill();}
+  var cx=w/2,cy=h/2+25,s=w/300;
+  var hairColor=charData?charData.hairColor:'#1a0a05';
+  var skinTone=charData?charData.skinTone:'#fde4d8';
+  ctx.fillStyle=hairColor;ctx.beginPath();ctx.ellipse(cx,cy-75*s,52*s,58*s,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(cx-45*s,cy-5*s,18*s,72*s,-0.15,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(cx+45*s,cy-5*s,18*s,72*s,0.15,0,Math.PI*2);ctx.fill();
+  var fc=ctx.createRadialGradient(cx,cy-72*s,0,cx,cy-72*s,42*s);fc.addColorStop(0,skinTone);fc.addColorStop(1,'#f5d0c5');ctx.fillStyle=fc;ctx.beginPath();ctx.ellipse(cx,cy-72*s,38*s,46*s,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#2a1810';ctx.beginPath();ctx.ellipse(cx-14*s,cy-75*s,5*s,8*s,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(cx+14*s,cy-75*s,5*s,8*s,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(cx-12*s,cy-77*s,2.5*s,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(cx+16*s,cy-77*s,2.5*s,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,120,120,0.35)';ctx.beginPath();ctx.ellipse(cx-28*s,cy-65*s,10*s,6*s,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(cx+28*s,cy-65*s,10*s,6*s,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#c47a7a';ctx.lineWidth=2*s;ctx.beginPath();ctx.arc(cx,cy-55*s,8*s,0.15,Math.PI-0.15);ctx.stroke();
+  ctx.fillStyle=skinTone;ctx.fillRect(cx-12*s,cy-30*s,24*s,24*s);ctx.beginPath();ctx.ellipse(cx,cy+10*s,48*s,30*s,0,Math.PI,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx-48*s,cy+10*s);ctx.quadraticCurveTo(cx-42*s,cy+95*s,cx-30*s,cy+120*s);ctx.lineTo(cx+30*s,cy+120*s);ctx.quadraticCurveTo(cx+42*s,cy+95*s,cx+48*s,cy+10*s);ctx.fill();
+  if(stageNum>=3){ctx.fillStyle='#f0c8be';ctx.beginPath();ctx.ellipse(cx-18*s,cy+30*s,22*s,18*s,0.1,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(cx+18*s,cy+30*s,22*s,18*s,-0.1,0,Math.PI*2);ctx.fill();}
+  if(stageNum<=1){var cg=ctx.createLinearGradient(cx-55*s,cy,cx+55*s,cy);cg.addColorStop(0,'#3a2a5a');cg.addColorStop(0.5,'#4a3a6a');cg.addColorStop(1,'#3a2a5a');ctx.fillStyle=cg;ctx.beginPath();ctx.moveTo(cx-52*s,cy-5*s);ctx.lineTo(cx-56*s,cy+120*s);ctx.lineTo(cx+56*s,cy+120*s);ctx.lineTo(cx+52*s,cy-5*s);ctx.closePath();ctx.fill();}
+  else if(stageNum<=2){var dg=ctx.createLinearGradient(cx,cy,cx,cy+120*s);dg.addColorStop(0,'#e44a8a');dg.addColorStop(1,'#c43070');ctx.fillStyle=dg;ctx.beginPath();ctx.moveTo(cx-40*s,cy-2*s);ctx.quadraticCurveTo(cx-48*s,cy+60*s,cx-45*s,cy+120*s);ctx.lineTo(cx+45*s,cy+120*s);ctx.quadraticCurveTo(cx+48*s,cy+60*s,cx+40*s,cy-2*s);ctx.closePath();ctx.fill();}
+  else if(stageNum<=3){ctx.fillStyle='#fff';ctx.strokeStyle='#fcc';ctx.lineWidth=2*s;ctx.beginPath();ctx.ellipse(cx-18*s,cy+30*s,24*s,20*s,0.1,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.ellipse(cx+18*s,cy+30*s,24*s,20*s,-0.1,0,Math.PI*2);ctx.fill();ctx.stroke();}
+  else if(stageNum<=4){ctx.fillStyle='#fff';ctx.strokeStyle='#fcc';ctx.lineWidth=2*s;ctx.beginPath();ctx.moveTo(cx-28*s,cy+80*s);ctx.lineTo(cx-32*s,cy+120*s);ctx.lineTo(cx+32*s,cy+120*s);ctx.lineTo(cx+28*s,cy+80*s);ctx.closePath();ctx.fill();ctx.stroke();ctx.font=(35*s)+'px serif';ctx.fillText('💗',cx-45*s,cy+42*s);ctx.fillText('💗',cx+10*s,cy+42*s);}
+  else{ctx.font=(35*s)+'px serif';ctx.fillText('💗',cx-45*s,cy+42*s);ctx.fillText('💗',cx+10*s,cy+42*s);var lg2=ctx.createRadialGradient(cx,cy+100*s,0,cx,cy+100*s,50*s);lg2.addColorStop(0,'rgba(255,255,220,1)');lg2.addColorStop(0.5,'rgba(255,255,180,0.8)');lg2.addColorStop(1,'rgba(255,255,120,0)');ctx.fillStyle=lg2;ctx.fillRect(cx-60*s,cy+60*s,120*s,65*s);}
+}
+
+function drawChar(ctx,w,h,stageNum){
+  var char=CHARACTERS.find(function(c){return c.id===selectedCharacter;})||CHARACTERS[0];
+  drawCharWithStyle(ctx,w,h,stageNum,char);
+}
+</script>
 </body>
 </html>
