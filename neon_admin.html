@@ -5,153 +5,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>네온 브레이커 - 관리자</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{--primary:#00f0ff;--secondary:#ff00aa;--accent:#ffdd00;--success:#00ff88;--danger:#ff4466;--bg:#0a0a12;--card:#12121f;--text:#fff;--text-dim:#7788aa}
     *{margin:0;padding:0;box-sizing:border-box}
-    body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);min-height:100vh;padding:20px}
+    body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);min-height:100vh;padding:15px}
     .container{max-width:800px;margin:0 auto}
-    h1{font-family:'Orbitron';font-size:24px;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .subtitle{text-align:center;color:var(--text-dim);margin-bottom:24px;font-size:13px}
-    .tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
-    .tab{padding:10px 20px;background:var(--card);border:2px solid #2a2a40;border-radius:8px;font-family:'Orbitron';font-size:11px;color:var(--text-dim);cursor:pointer}
+    h1{font-family:'Orbitron';font-size:22px;text-align:center;margin-bottom:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{text-align:center;color:var(--text-dim);margin-bottom:20px;font-size:12px}
+    .tabs{display:flex;gap:5px;margin-bottom:15px;flex-wrap:wrap;justify-content:center}
+    .tab{padding:10px 18px;background:var(--card);border:2px solid #2a2a40;border-radius:8px;font-family:'Orbitron';font-size:10px;color:var(--text-dim);cursor:pointer}
     .tab:hover{border-color:var(--primary)}
     .tab.active{background:var(--primary);color:#000;border-color:var(--primary)}
-    .panel{display:none;background:var(--card);border:2px solid #2a2a40;border-radius:14px;padding:20px}
+    .panel{display:none;background:var(--card);border:2px solid #2a2a40;border-radius:12px;padding:15px}
     .panel.active{display:block}
-    .section{margin-bottom:20px}
-    .section-title{font-family:'Orbitron';font-size:13px;color:var(--secondary);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,0,170,0.2)}
-    .info-box{background:#0a0a12;border:1px solid #2a2a40;border-radius:10px;padding:16px;margin-bottom:16px}
-    .info-box h4{color:var(--accent);font-size:12px;margin-bottom:8px}
-    .info-box p{color:var(--text-dim);font-size:12px;line-height:1.6}
-    .info-box code{background:#1a1a2f;padding:2px 8px;border-radius:4px;color:var(--primary);font-size:11px}
-    .file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-    .file-card{background:#0a0a12;border:2px solid #2a2a40;border-radius:10px;padding:12px;text-align:center}
-    .file-card.exists{border-color:var(--success)}
-    .file-card .preview{width:100%;height:80px;background:#050508;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .file-card .preview img,.file-card .preview video{max-width:100%;max-height:100%;object-fit:contain}
-    .file-card .name{font-family:'Orbitron';font-size:10px;color:var(--text-dim)}
-    .file-card .status{font-size:9px;margin-top:4px}
-    .badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:9px}
-    .badge-success{background:rgba(0,255,136,0.15);color:var(--success)}
-    .badge-warning{background:rgba(255,221,0,0.15);color:var(--accent)}
-    .row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-    .row label{min-width:80px;color:var(--text-dim);font-size:13px}
-    .input{padding:8px 12px;background:#0a0a12;border:1px solid #2a2a40;border-radius:6px;color:#fff;font-size:13px}
-    .input:focus{outline:none;border-color:var(--primary)}
+    .section{margin-bottom:18px}
+    .section-title{font-family:'Orbitron';font-size:12px;color:var(--secondary);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,0,170,0.2)}
+    .upload-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+    .upload-card{background:#0a0a12;border:2px solid #2a2a40;border-radius:10px;padding:10px;text-align:center}
+    .upload-card.has-image{border-color:var(--success)}
+    .upload-card .preview{width:100%;height:80px;background:#050508;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+    .upload-card .preview img,.upload-card .preview video{width:100%;height:100%;object-fit:cover}
+    .upload-card .preview .placeholder{color:#333;font-size:28px}
+    .upload-card .label{font-family:'Orbitron';font-size:9px;color:var(--text-dim);margin-bottom:6px}
+    .upload-card input[type="file"]{display:none}
+    .upload-card .upload-btn{width:100%;padding:6px;background:var(--primary);border:none;border-radius:6px;font-family:'Orbitron';font-size:9px;color:#000;cursor:pointer}
+    .upload-card .upload-btn:hover{filter:brightness(1.1)}
+    .upload-card .delete-btn{position:absolute;top:4px;right:4px;width:20px;height:20px;background:var(--danger);border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:none}
+    .upload-card:hover .delete-btn{display:block}
+    .round-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+    .round-tab{padding:6px 14px;background:#1a1a2f;border:1px solid #2a2a40;border-radius:6px;font-family:'Orbitron';font-size:9px;color:var(--text-dim);cursor:pointer}
+    .round-tab.active{border-color:var(--accent);color:var(--accent)}
     .btn{padding:8px 16px;font-family:'Orbitron';font-size:10px;border:none;border-radius:6px;cursor:pointer}
     .btn-primary{background:var(--primary);color:#000}
-    .btn-success{background:var(--success);color:#000}
     .btn-danger{background:var(--danger);color:#fff}
     .btn-ghost{background:transparent;border:1px solid #2a2a40;color:var(--text-dim)}
-    .btn-group{display:flex;gap:6px;flex-wrap:wrap}
-    .char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
-    .char-card{background:#0a0a12;border:2px solid #2a2a40;border-radius:10px;padding:10px;text-align:center}
-    .char-card.unlocked{border-color:var(--success)}
-    .char-card .preview{width:100%;height:70px;background:#050508;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .char-card .preview img{max-width:100%;max-height:100%;object-fit:cover}
-    .char-card .name{font-family:'Orbitron';font-size:10px;margin-bottom:4px}
-    .char-card input[type="text"]{width:100%;padding:4px;background:#0a0a12;border:1px solid #2a2a40;border-radius:4px;color:#fff;font-size:10px;text-align:center;margin-bottom:4px}
-    .color-row{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
-    .color-input{width:30px;height:24px;padding:1px;border:1px solid #2a2a40;border-radius:4px;background:#0a0a12;cursor:pointer}
-    .table{width:100%;border-collapse:collapse;font-size:12px}
-    .table th,.table td{padding:8px;text-align:left;border-bottom:1px solid #2a2a40}
-    .table th{font-family:'Orbitron';font-size:10px;color:var(--primary);background:rgba(0,240,255,0.05)}
-    .table input{width:60px;padding:4px;background:#0a0a12;border:1px solid #2a2a40;border-radius:4px;color:#fff;text-align:center}
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px}
-    .stat-card{background:#0a0a12;border:1px solid #2a2a40;border-radius:8px;padding:12px;text-align:center}
-    .stat-card .value{font-family:'Orbitron';font-size:20px;color:var(--accent)}
-    .stat-card .label{font-size:10px;color:var(--text-dim)}
-    .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);padding:12px 24px;background:rgba(0,0,0,0.95);border:1px solid var(--success);border-radius:20px;font-family:'Orbitron';font-size:11px;color:var(--success);opacity:0;transition:all 0.3s;z-index:999}
+    .row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+    .input{padding:8px 12px;background:#0a0a12;border:1px solid #2a2a40;border-radius:6px;color:#fff;font-size:12px}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:12px}
+    .stat-card{background:#0a0a12;border:1px solid #2a2a40;border-radius:8px;padding:10px;text-align:center}
+    .stat-card .value{font-family:'Orbitron';font-size:18px;color:var(--accent)}
+    .stat-card .label{font-size:9px;color:var(--text-dim)}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);padding:10px 20px;background:rgba(0,0,0,0.95);border:1px solid var(--success);border-radius:20px;font-family:'Orbitron';font-size:10px;color:var(--success);opacity:0;transition:all 0.3s;z-index:999}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.error{border-color:var(--danger);color:var(--danger)}
+    .loading{display:inline-block;width:16px;height:16px;border:2px solid #333;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .status-bar{padding:10px;background:#0a0a12;border-radius:8px;margin-bottom:15px;font-size:11px;display:flex;align-items:center;gap:10px}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--danger)}
+    .status-dot.connected{background:var(--success)}
   </style>
 </head>
 <body>
   <div class="container">
     <h1>⚙️ 네온 브레이커 관리자</h1>
-    <p class="subtitle">게임 설정 및 콘텐츠 관리</p>
+    <p class="subtitle">이미지/영상 업로드 및 게임 설정</p>
+    
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Supabase 연결 중...</span>
+    </div>
     
     <div class="tabs">
-      <button class="tab active" data-tab="media">🖼️ 미디어</button>
-      <button class="tab" data-tab="characters">👤 캐릭터</button>
-      <button class="tab" data-tab="stages">🎮 스테이지</button>
+      <button class="tab active" data-tab="thumbs">👤 캐릭터 썸네일</button>
+      <button class="tab" data-tab="stages">🎬 스테이지 이미지</button>
       <button class="tab" data-tab="data">💾 데이터</button>
     </div>
 
-    <!-- Media Panel -->
-    <div class="panel active" id="mediaPanel">
-      <div class="info-box">
-        <h4>📁 미디어 파일 업로드 방법</h4>
-        <p>GitHub 저장소의 <code>media/</code> 폴더에 파일을 직접 업로드하세요.</p>
-        <br>
-        <p><strong>📷 캐릭터 썸네일:</strong> <code>media/thumbs/char_1.jpg</code>, <code>char_2.png</code> ...</p>
-        <p><strong>🎬 스테이지 미디어:</strong> <code>media/stages/r1_s1.jpg</code> (라운드1 스테이지1)</p>
-        <br>
-        <p>지원 형식: JPG, PNG, GIF, MP4, WebM</p>
-      </div>
-      
+    <!-- Thumbs Panel -->
+    <div class="panel active" id="thumbsPanel">
       <div class="section">
-        <div class="section-title">📷 캐릭터 썸네일 현황</div>
-        <div class="file-grid" id="thumbGrid"></div>
-      </div>
-      
-      <div class="section">
-        <div class="section-title">🎬 스테이지 미디어 현황 (라운드 1)</div>
-        <div class="file-grid" id="stageGrid"></div>
-      </div>
-    </div>
-
-    <!-- Characters Panel -->
-    <div class="panel" id="charactersPanel">
-      <div class="section">
-        <div class="section-title">👤 캐릭터 설정</div>
-        <div class="btn-group" style="margin-bottom:12px;">
-          <button class="btn btn-success" id="addCharBtn">+ 추가</button>
-          <button class="btn btn-primary" id="unlockAllCharsBtn">전체 해금</button>
-          <button class="btn btn-primary" id="saveCharsBtn">💾 저장</button>
-        </div>
-        <div class="char-grid" id="charGrid"></div>
+        <div class="section-title">👤 캐릭터 썸네일 (안전한 이미지)</div>
+        <p style="color:var(--text-dim);font-size:11px;margin-bottom:12px;">게임 시작 시 캐릭터 선택 화면에 표시됩니다.</p>
+        <div class="upload-grid" id="thumbsGrid"></div>
       </div>
     </div>
 
     <!-- Stages Panel -->
     <div class="panel" id="stagesPanel">
       <div class="section">
-        <div class="section-title">🎮 스테이지 난이도 설정</div>
-        <div class="btn-group" style="margin-bottom:12px;">
-          <button class="btn btn-success" id="addStageBtn">+ 추가</button>
-          <button class="btn btn-primary" id="saveStagesBtn">💾 저장</button>
-          <button class="btn btn-ghost" id="resetStagesBtn">기본값</button>
-        </div>
-        <table class="table">
-          <thead><tr><th>스테이지</th><th>행</th><th>열</th><th>속도</th><th>강한%</th><th>폭발%</th><th>삭제</th></tr></thead>
-          <tbody id="stageTableBody"></tbody>
-        </table>
+        <div class="section-title">🎬 스테이지 클리어 이미지 (secret 폴더)</div>
+        <p style="color:var(--text-dim);font-size:11px;margin-bottom:12px;">스테이지 클리어 시 표시됩니다. JPG, PNG, MP4 지원.</p>
+        <div class="round-tabs" id="roundTabs"></div>
+        <div class="upload-grid" id="stagesGrid"></div>
       </div>
     </div>
 
     <!-- Data Panel -->
     <div class="panel" id="dataPanel">
       <div class="section">
-        <div class="section-title">📊 현재 게임 데이터</div>
+        <div class="section-title">📊 게임 데이터</div>
         <div class="stats-grid" id="statsGrid"></div>
       </div>
-      
       <div class="section">
         <div class="section-title">💰 코인 관리</div>
         <div class="row">
-          <label>코인</label>
           <input type="number" class="input" id="coinInput" style="width:100px;">
           <button class="btn btn-primary" id="setCoinsBtn">설정</button>
           <button class="btn btn-ghost" id="add1kBtn">+1천</button>
           <button class="btn btn-ghost" id="add10kBtn">+1만</button>
         </div>
       </div>
-      
       <div class="section">
-        <div class="section-title">⚠️ 데이터 관리</div>
-        <div class="btn-group">
-          <button class="btn btn-success" id="unlockAllBtn">🔓 전체 해금</button>
-          <button class="btn btn-danger" id="resetAllBtn">🗑️ 초기화</button>
+        <div class="section-title">⚠️ 위험</div>
+        <div class="row">
+          <button class="btn btn-primary" id="unlockAllBtn">🔓 전체 해금</button>
+          <button class="btn btn-danger" id="resetBtn">🗑️ 초기화</button>
         </div>
       </div>
     </div>
@@ -160,242 +119,306 @@
   <div class="toast" id="toast"></div>
 
 <script>
-var CHARACTERS = JSON.parse(localStorage.getItem('nb_characters')) || [
-  {id:1,name:'미스터리 걸',hairColor:'#1a0a05',skinTone:'#fde4d8'},
-  {id:2,name:'선셋 뷰티',hairColor:'#8B4513',skinTone:'#f5d0c5'},
-  {id:3,name:'미드나잇',hairColor:'#1a1a3a',skinTone:'#f0e0d6'},
-  {id:4,name:'체리 블로섬',hairColor:'#ff6b9d',skinTone:'#ffe4d8'},
-  {id:5,name:'골든 스타',hairColor:'#daa520',skinTone:'#f5e0d0'},
-  {id:6,name:'실버 문',hairColor:'#c0c0c0',skinTone:'#f8e8e0'}
-];
+// Supabase 설정
+var SUPABASE_URL = 'https://ealukkcyetnoouslojaa.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhbHVra2N5ZXRub291c2xvamFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5ODkwNjAsImV4cCI6MjA4NDU2NTA2MH0.SQ77IL13Da3FczDKEtEcHwkQCRDKCA1-RaTBjQ5SvE0';
 
-var STG = JSON.parse(localStorage.getItem('nb_stages')) || {
-  1:{r:3,c:5,s:3.2,str:0,exp:0.12},2:{r:3,c:6,s:3.5,str:0.05,exp:0.12},
-  3:{r:4,c:6,s:3.8,str:0.08,exp:0.1},4:{r:4,c:6,s:4,str:0.1,exp:0.1},
-  5:{r:4,c:7,s:4.2,str:0.12,exp:0.08},6:{r:5,c:7,s:4.5,str:0.15,exp:0.08},
-  7:{r:5,c:7,s:4.8,str:0.18,exp:0.06}
-};
+var supabase;
+var currentRound = 1;
+var maxRounds = 6;
+var stagesPerRound = 7;
+var maxChars = 6;
 
-var coins = parseInt(localStorage.getItem('nb_coins')) || 0;
-var unlockedChars = JSON.parse(localStorage.getItem('nb_unlocked_chars')) || [1];
-
-window.onload = function(){
+// 초기화
+window.onload = async function(){
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  
+  await checkConnection();
   setupTabs();
-  renderThumbGrid();
-  renderStageMediaGrid();
-  renderCharacters();
-  renderStageTable();
-  renderStats();
-  document.getElementById('coinInput').value = coins;
   setupEvents();
+  renderThumbs();
+  renderRoundTabs();
+  renderStages();
+  renderStats();
 };
+
+async function checkConnection(){
+  try {
+    var { data, error } = await supabase.storage.listBuckets();
+    if(error) throw error;
+    
+    // thumbs 버킷 확인/생성
+    var thumbsBucket = data.find(b => b.name === 'thumbs');
+    if(!thumbsBucket){
+      await supabase.storage.createBucket('thumbs', { public: true });
+    }
+    
+    // secret 버킷 확인/생성
+    var secretBucket = data.find(b => b.name === 'secret');
+    if(!secretBucket){
+      await supabase.storage.createBucket('secret', { public: true });
+    }
+    
+    document.getElementById('statusDot').classList.add('connected');
+    document.getElementById('statusText').textContent = 'Supabase 연결됨';
+  } catch(e) {
+    document.getElementById('statusText').textContent = 'Supabase 연결 실패: ' + e.message;
+    toast('Supabase 연결 실패!', true);
+  }
+}
 
 function setupTabs(){
   document.querySelectorAll('.tab').forEach(function(tab){
     tab.onclick = function(){
-      document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-      document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       tab.classList.add('active');
-      document.getElementById(tab.dataset.tab+'Panel').classList.add('active');
+      document.getElementById(tab.dataset.tab + 'Panel').classList.add('active');
     };
   });
 }
 
 function setupEvents(){
   document.getElementById('setCoinsBtn').onclick = function(){
-    coins = parseInt(document.getElementById('coinInput').value) || 0;
+    var coins = parseInt(document.getElementById('coinInput').value) || 0;
     localStorage.setItem('nb_coins', coins);
     renderStats();
     toast('코인 설정됨!');
   };
   document.getElementById('add1kBtn').onclick = function(){
-    coins += 1000;
-    document.getElementById('coinInput').value = coins;
+    var coins = (parseInt(localStorage.getItem('nb_coins')) || 0) + 1000;
     localStorage.setItem('nb_coins', coins);
+    document.getElementById('coinInput').value = coins;
     renderStats();
     toast('+1,000!');
   };
   document.getElementById('add10kBtn').onclick = function(){
-    coins += 10000;
-    document.getElementById('coinInput').value = coins;
+    var coins = (parseInt(localStorage.getItem('nb_coins')) || 0) + 10000;
     localStorage.setItem('nb_coins', coins);
+    document.getElementById('coinInput').value = coins;
     renderStats();
     toast('+10,000!');
   };
-  document.getElementById('addCharBtn').onclick = addCharacter;
-  document.getElementById('unlockAllCharsBtn').onclick = unlockAllChars;
-  document.getElementById('saveCharsBtn').onclick = saveCharacters;
-  document.getElementById('addStageBtn').onclick = addStage;
-  document.getElementById('saveStagesBtn').onclick = saveStages;
-  document.getElementById('resetStagesBtn').onclick = function(){
-    if(confirm('스테이지 기본값 복원?')){localStorage.removeItem('nb_stages');location.reload();}
+  document.getElementById('unlockAllBtn').onclick = function(){
+    var chars = [];
+    for(var i = 1; i <= maxChars; i++) chars.push(i);
+    localStorage.setItem('nb_unlocked_chars', JSON.stringify(chars));
+    toast('전체 해금!');
   };
-  document.getElementById('unlockAllBtn').onclick = unlockAll;
-  document.getElementById('resetAllBtn').onclick = function(){
-    if(confirm('모든 데이터 초기화?')){localStorage.clear();location.reload();}
+  document.getElementById('resetBtn').onclick = function(){
+    if(confirm('모든 데이터 초기화?')){
+      localStorage.clear();
+      location.reload();
+    }
   };
 }
 
-function renderThumbGrid(){
+// 캐릭터 썸네일
+async function renderThumbs(){
+  var grid = document.getElementById('thumbsGrid');
   var html = '';
-  for(var i = 1; i <= 6; i++){
-    var path = 'media/thumbs/char_'+i+'.jpg';
-    html += '<div class="file-card" id="thumb'+i+'"><div class="preview"><img src="'+path+'" onerror="this.parentElement.innerHTML=\'❌\'"></div><div class="name">char_'+i+'.jpg</div></div>';
-  }
-  document.getElementById('thumbGrid').innerHTML = html;
-}
-
-function renderStageMediaGrid(){
-  var html = '';
-  for(var s = 1; s <= 7; s++){
-    var path = 'media/stages/r1_s'+s+'.jpg';
-    html += '<div class="file-card" id="stage1_'+s+'"><div class="preview"><img src="'+path+'" onerror="this.parentElement.innerHTML=\'❌\'"></div><div class="name">r1_s'+s+'.jpg</div></div>';
-  }
-  document.getElementById('stageGrid').innerHTML = html;
-}
-
-function renderCharacters(){
-  var html = '';
-  CHARACTERS.forEach(function(char, idx){
-    var isUnlocked = unlockedChars.indexOf(char.id) !== -1;
-    var path = 'media/thumbs/char_'+char.id+'.jpg';
-    html += '<div class="char-card'+(isUnlocked?' unlocked':'')+'">';
-    html += '<div class="preview"><img src="'+path+'" onerror="this.parentElement.innerHTML=\'👤\'"></div>';
-    html += '<input type="text" value="'+char.name+'" data-idx="'+idx+'" data-field="name">';
-    html += '<div class="color-row"><input type="color" class="color-input" value="'+char.hairColor+'" data-idx="'+idx+'" data-field="hairColor" title="머리색"><input type="color" class="color-input" value="'+char.skinTone+'" data-idx="'+idx+'" data-field="skinTone" title="피부색"></div>';
-    html += '<span class="badge '+(isUnlocked?'badge-success':'badge-warning')+'">'+(isUnlocked?'해금':'잠김')+'</span>';
-    html += '<button class="btn btn-ghost" style="width:100%;margin-top:4px;font-size:9px;padding:4px;" data-toggle="'+char.id+'">'+(isUnlocked?'잠금':'해금')+'</button>';
+  
+  for(var i = 1; i <= maxChars; i++){
+    html += '<div class="upload-card" data-char="' + i + '">';
+    html += '<div class="preview" id="thumbPreview' + i + '"><span class="placeholder">👤</span></div>';
+    html += '<div class="label">캐릭터 ' + i + '</div>';
+    html += '<input type="file" accept="image/*" id="thumbInput' + i + '">';
+    html += '<button class="upload-btn" onclick="document.getElementById(\'thumbInput' + i + '\').click()">📷 업로드</button>';
     html += '</div>';
-  });
-  document.getElementById('charGrid').innerHTML = html;
+  }
+  grid.innerHTML = html;
   
-  document.querySelectorAll('[data-toggle]').forEach(function(btn){
-    btn.onclick = function(){
-      var id = parseInt(btn.dataset.toggle);
-      var idx = unlockedChars.indexOf(id);
-      if(idx === -1) unlockedChars.push(id);
-      else unlockedChars.splice(idx, 1);
-      localStorage.setItem('nb_unlocked_chars', JSON.stringify(unlockedChars));
-      renderCharacters();
-      renderStats();
+  // 기존 이미지 로드
+  for(var i = 1; i <= maxChars; i++){
+    loadThumb(i);
+    setupThumbInput(i);
+  }
+}
+
+async function loadThumb(charId){
+  var preview = document.getElementById('thumbPreview' + charId);
+  var card = preview.parentElement;
+  
+  var { data } = supabase.storage.from('thumbs').getPublicUrl('char_' + charId + '.jpg');
+  
+  var img = new Image();
+  img.onload = function(){
+    preview.innerHTML = '<img src="' + data.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteThumb(' + charId + ')">✕</button>';
+    card.classList.add('has-image');
+  };
+  img.onerror = function(){
+    // png 시도
+    var { data: data2 } = supabase.storage.from('thumbs').getPublicUrl('char_' + charId + '.png');
+    var img2 = new Image();
+    img2.onload = function(){
+      preview.innerHTML = '<img src="' + data2.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteThumb(' + charId + ')">✕</button>';
+      card.classList.add('has-image');
     };
-  });
+    img2.src = data2.publicUrl;
+  };
+  img.src = data.publicUrl;
 }
 
-function addCharacter(){
-  var newId = CHARACTERS.length + 1;
-  CHARACTERS.push({id:newId, name:'캐릭터 '+newId, hairColor:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'), skinTone:'#fde4d8'});
-  localStorage.setItem('nb_characters', JSON.stringify(CHARACTERS));
-  renderCharacters();
-  toast('캐릭터 추가!');
+function setupThumbInput(charId){
+  document.getElementById('thumbInput' + charId).onchange = async function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    
+    var ext = file.name.split('.').pop().toLowerCase();
+    var fileName = 'char_' + charId + '.' + ext;
+    
+    toast('업로드 중...');
+    
+    // 기존 파일 삭제
+    await supabase.storage.from('thumbs').remove(['char_' + charId + '.jpg', 'char_' + charId + '.png']);
+    
+    var { error } = await supabase.storage.from('thumbs').upload(fileName, file, { upsert: true });
+    
+    if(error){
+      toast('업로드 실패: ' + error.message, true);
+    } else {
+      toast('업로드 완료!');
+      loadThumb(charId);
+    }
+  };
 }
 
-function saveCharacters(){
-  document.querySelectorAll('.char-card input').forEach(function(inp){
-    var idx = parseInt(inp.dataset.idx);
-    var field = inp.dataset.field;
-    if(idx !== undefined && field) CHARACTERS[idx][field] = inp.value;
-  });
-  localStorage.setItem('nb_characters', JSON.stringify(CHARACTERS));
-  toast('캐릭터 저장!');
+async function deleteThumb(charId){
+  if(!confirm('삭제하시겠습니까?')) return;
+  
+  await supabase.storage.from('thumbs').remove(['char_' + charId + '.jpg', 'char_' + charId + '.png']);
+  
+  var preview = document.getElementById('thumbPreview' + charId);
+  preview.innerHTML = '<span class="placeholder">👤</span>';
+  preview.parentElement.classList.remove('has-image');
+  toast('삭제됨!');
 }
 
-function unlockAllChars(){
-  CHARACTERS.forEach(function(c){if(unlockedChars.indexOf(c.id)===-1)unlockedChars.push(c.id);});
-  localStorage.setItem('nb_unlocked_chars', JSON.stringify(unlockedChars));
-  renderCharacters();
-  renderStats();
-  toast('전체 해금!');
-}
-
-function renderStageTable(){
+// 스테이지 이미지
+function renderRoundTabs(){
+  var tabs = document.getElementById('roundTabs');
   var html = '';
-  Object.keys(STG).map(Number).sort(function(a,b){return a-b;}).forEach(function(k){
-    var st = STG[k];
-    html += '<tr data-stage="'+k+'"><td>S'+k+'</td>';
-    html += '<td><input type="number" value="'+st.r+'" data-f="r" min="1" max="10"></td>';
-    html += '<td><input type="number" value="'+st.c+'" data-f="c" min="1" max="10"></td>';
-    html += '<td><input type="number" value="'+st.s+'" data-f="s" step="0.1"></td>';
-    html += '<td><input type="number" value="'+st.str+'" data-f="str" step="0.01"></td>';
-    html += '<td><input type="number" value="'+st.exp+'" data-f="exp" step="0.01"></td>';
-    html += '<td><button class="btn btn-danger" data-del="'+k+'" style="padding:4px 8px;font-size:9px;">X</button></td></tr>';
-  });
-  document.getElementById('stageTableBody').innerHTML = html;
+  for(var r = 1; r <= maxRounds; r++){
+    html += '<button class="round-tab' + (r === currentRound ? ' active' : '') + '" data-round="' + r + '">라운드 ' + r + '</button>';
+  }
+  tabs.innerHTML = html;
   
-  document.querySelectorAll('[data-del]').forEach(function(btn){
-    btn.onclick = function(){
-      if(Object.keys(STG).length <= 1){toast('최소 1개 필요!');return;}
-      delete STG[parseInt(btn.dataset.del)];
-      renumberStages();
-      localStorage.setItem('nb_stages', JSON.stringify(STG));
-      renderStageTable();
-      toast('삭제됨!');
+  tabs.querySelectorAll('.round-tab').forEach(function(tab){
+    tab.onclick = function(){
+      currentRound = parseInt(tab.dataset.round);
+      tabs.querySelectorAll('.round-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderStages();
     };
   });
 }
 
-function addStage(){
-  var keys = Object.keys(STG).map(Number);
-  var newKey = Math.max.apply(null, keys) + 1;
-  var last = STG[Math.max.apply(null, keys)];
-  STG[newKey] = {r:Math.min(8,last.r+1),c:last.c,s:Math.min(8,+(last.s+0.3).toFixed(1)),str:Math.min(0.5,+(last.str+0.03).toFixed(2)),exp:Math.max(0.02,+(last.exp-0.01).toFixed(2))};
-  localStorage.setItem('nb_stages', JSON.stringify(STG));
-  renderStageTable();
-  toast('스테이지 추가!');
+async function renderStages(){
+  var grid = document.getElementById('stagesGrid');
+  var html = '';
+  
+  for(var s = 1; s <= stagesPerRound; s++){
+    var key = 'r' + currentRound + '_s' + s;
+    html += '<div class="upload-card" data-key="' + key + '">';
+    html += '<div class="preview" id="stagePreview_' + key + '"><span class="placeholder">🎬</span></div>';
+    html += '<div class="label">스테이지 ' + s + '</div>';
+    html += '<input type="file" accept="image/*,video/*" id="stageInput_' + key + '">';
+    html += '<button class="upload-btn" onclick="document.getElementById(\'stageInput_' + key + '\').click()">📷 업로드</button>';
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+  
+  // 기존 이미지 로드
+  for(var s = 1; s <= stagesPerRound; s++){
+    var key = 'r' + currentRound + '_s' + s;
+    loadStage(key);
+    setupStageInput(key);
+  }
 }
 
-function saveStages(){
-  document.querySelectorAll('#stageTableBody tr').forEach(function(row){
-    var k = parseInt(row.dataset.stage);
-    STG[k] = {
-      r:parseInt(row.querySelector('[data-f="r"]').value)||3,
-      c:parseInt(row.querySelector('[data-f="c"]').value)||5,
-      s:parseFloat(row.querySelector('[data-f="s"]').value)||3,
-      str:parseFloat(row.querySelector('[data-f="str"]').value)||0,
-      exp:parseFloat(row.querySelector('[data-f="exp"]').value)||0.1
-    };
-  });
-  localStorage.setItem('nb_stages', JSON.stringify(STG));
-  toast('저장됨!');
+async function loadStage(key){
+  var preview = document.getElementById('stagePreview_' + key);
+  var card = preview.parentElement;
+  
+  // jpg, png, mp4 순서로 시도
+  var exts = ['jpg', 'png', 'mp4'];
+  
+  for(var ext of exts){
+    var { data } = supabase.storage.from('secret').getPublicUrl(key + '.' + ext);
+    
+    if(ext === 'mp4'){
+      // 비디오 체크는 별도로
+      var video = document.createElement('video');
+      video.onloadeddata = function(){
+        preview.innerHTML = '<video src="' + data.publicUrl + '?' + Date.now() + '" autoplay muted loop></video><button class="delete-btn" onclick="deleteStage(\'' + key + '\')">✕</button>';
+        card.classList.add('has-image');
+      };
+      video.src = data.publicUrl;
+    } else {
+      var img = new Image();
+      img.onload = (function(url, k){
+        return function(){
+          document.getElementById('stagePreview_' + k).innerHTML = '<img src="' + url + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteStage(\'' + k + '\')">✕</button>';
+          document.getElementById('stagePreview_' + k).parentElement.classList.add('has-image');
+        };
+      })(data.publicUrl, key);
+      img.src = data.publicUrl;
+    }
+  }
 }
 
-function renumberStages(){
-  var newSTG = {}, idx = 1;
-  Object.keys(STG).map(Number).sort(function(a,b){return a-b;}).forEach(function(k){newSTG[idx++]=STG[k];});
-  STG = newSTG;
+function setupStageInput(key){
+  document.getElementById('stageInput_' + key).onchange = async function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    
+    var ext = file.name.split('.').pop().toLowerCase();
+    var fileName = key + '.' + ext;
+    
+    toast('업로드 중...');
+    
+    // 기존 파일 삭제
+    await supabase.storage.from('secret').remove([key + '.jpg', key + '.png', key + '.mp4']);
+    
+    var { error } = await supabase.storage.from('secret').upload(fileName, file, { upsert: true });
+    
+    if(error){
+      toast('업로드 실패: ' + error.message, true);
+    } else {
+      toast('업로드 완료!');
+      loadStage(key);
+    }
+  };
+}
+
+async function deleteStage(key){
+  if(!confirm('삭제하시겠습니까?')) return;
+  
+  await supabase.storage.from('secret').remove([key + '.jpg', key + '.png', key + '.mp4']);
+  
+  var preview = document.getElementById('stagePreview_' + key);
+  preview.innerHTML = '<span class="placeholder">🎬</span>';
+  preview.parentElement.classList.remove('has-image');
+  toast('삭제됨!');
 }
 
 function renderStats(){
-  var owned = JSON.parse(localStorage.getItem('nb_owned')) || {};
+  var coins = parseInt(localStorage.getItem('nb_coins')) || 0;
   var round = parseInt(localStorage.getItem('nb_round')) || 1;
+  var unlocked = JSON.parse(localStorage.getItem('nb_unlocked_chars')) || [1];
+  
+  document.getElementById('coinInput').value = coins;
   document.getElementById('statsGrid').innerHTML = 
-    '<div class="stat-card"><div class="value">'+coins.toLocaleString()+'</div><div class="label">코인</div></div>'+
-    '<div class="stat-card"><div class="value">'+round+'</div><div class="label">라운드</div></div>'+
-    '<div class="stat-card"><div class="value">'+unlockedChars.length+'/'+CHARACTERS.length+'</div><div class="label">캐릭터</div></div>'+
-    '<div class="stat-card"><div class="value">'+Object.keys(owned).length+'</div><div class="label">아이템</div></div>';
+    '<div class="stat-card"><div class="value">' + coins.toLocaleString() + '</div><div class="label">코인</div></div>' +
+    '<div class="stat-card"><div class="value">' + round + '</div><div class="label">라운드</div></div>' +
+    '<div class="stat-card"><div class="value">' + unlocked.length + '/' + maxChars + '</div><div class="label">캐릭터</div></div>';
 }
 
-function unlockAll(){
-  var owned = {w_normal:true,w_spread:true,w_laser:true,w_rapid:true,w_missile:true,b_white:true,b_fire:true,b_ice:true,b_spark:true,b_prism:true,s_bomb:true,s_bolt:true,s_fire:true,s_cd:true,i_magnet:true,i_shield:true,i_double:true,i_heart:true};
-  localStorage.setItem('nb_owned', JSON.stringify(owned));
-  localStorage.setItem('nb_buffs', JSON.stringify({bombUp:true,boltUp:true,fireUp:true,cdDown:true}));
-  localStorage.setItem('nb_pass', JSON.stringify({magnet:true,double:true}));
-  localStorage.setItem('nb_maxhp', 6);
-  localStorage.setItem('nb_speed', 3);
-  localStorage.setItem('nb_firerate', 3);
-  localStorage.setItem('nb_bullets', 5);
-  CHARACTERS.forEach(function(c){if(unlockedChars.indexOf(c.id)===-1)unlockedChars.push(c.id);});
-  localStorage.setItem('nb_unlocked_chars', JSON.stringify(unlockedChars));
-  renderCharacters();
-  renderStats();
-  toast('전체 해금 완료!');
-}
-
-function toast(msg){
+function toast(msg, isError){
   var t = document.getElementById('toast');
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');}, 2000);
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(function(){ t.className = 'toast'; }, 2500);
 }
 </script>
 </body>
