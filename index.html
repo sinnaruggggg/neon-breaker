@@ -113,7 +113,6 @@
       <div class="coin-badge"><span>🪙</span><span class="amount" id="menuCoins">0</span></div>
       <button class="btn btn-primary" id="startBtn">게임 시작</button>
       <button class="btn btn-gold" id="shopBtn">🛒 상점</button>
-      <button class="btn btn-ghost" id="adminBtn">⚙️ 관리자</button>
     </div></div>
 
     <!-- Character Select -->
@@ -1147,8 +1146,6 @@ function setupInput(){
 function setupButtons(){
   document.getElementById('startBtn').onclick = showCharSelect;
   document.getElementById('shopBtn').onclick = function(){ showShop('menu'); };
-  document.getElementById('adminBtn').onclick = function(){ window.open('neon_admin.html','_blank'); };
-  
   document.getElementById('playBtn').onclick = startGame;
   document.getElementById('backBtn').onclick = showStart;
   
