@@ -10,7 +10,7 @@
     :root{--primary:#00f0ff;--secondary:#ff00aa;--accent:#ffdd00;--success:#00ff88;--danger:#ff4466;--bg:#0a0a12;--card:#12121f;--text:#fff;--text-dim:#7788aa}
     *{margin:0;padding:0;box-sizing:border-box}
     body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);min-height:100vh;padding:15px}
-    .container{max-width:800px;margin:0 auto}
+    .container{max-width:900px;margin:0 auto}
     h1{font-family:'Orbitron';font-size:22px;text-align:center;margin-bottom:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .subtitle{text-align:center;color:var(--text-dim);margin-bottom:20px;font-size:12px}
     .status-bar{padding:10px;background:#0a0a12;border-radius:8px;margin-bottom:15px;font-size:11px;display:flex;align-items:center;gap:10px}
@@ -23,31 +23,48 @@
     .panel{display:none;background:var(--card);border:2px solid #2a2a40;border-radius:12px;padding:15px}
     .panel.active{display:block}
     .section{margin-bottom:18px}
-    .section-title{font-family:'Orbitron';font-size:12px;color:var(--secondary);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,0,170,0.2)}
-    .upload-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-    .upload-card{background:#0a0a12;border:2px solid #2a2a40;border-radius:10px;padding:10px;text-align:center}
-    .upload-card.has-image{border-color:var(--success)}
-    .upload-card .preview{width:100%;height:80px;background:#050508;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-    .upload-card .preview img,.upload-card .preview video{width:100%;height:100%;object-fit:cover}
-    .upload-card .preview .placeholder{color:#333;font-size:28px}
-    .upload-card .label{font-family:'Orbitron';font-size:9px;color:var(--text-dim);margin-bottom:6px}
-    .upload-card input[type="file"]{display:none}
-    .upload-card .upload-btn{width:100%;padding:6px;background:var(--primary);border:none;border-radius:6px;font-family:'Orbitron';font-size:9px;color:#000;cursor:pointer}
-    .upload-card .delete-btn{position:absolute;top:4px;right:4px;width:20px;height:20px;background:var(--danger);border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:none}
-    .upload-card:hover .delete-btn{display:block}
-    .round-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
-    .round-tab{padding:6px 14px;background:#1a1a2f;border:1px solid #2a2a40;border-radius:6px;font-family:'Orbitron';font-size:9px;color:var(--text-dim);cursor:pointer}
-    .round-tab.active{border-color:var(--accent);color:var(--accent)}
+    .section-title{font-family:'Orbitron';font-size:12px;color:var(--secondary);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,0,170,0.2);display:flex;justify-content:space-between;align-items:center}
     .btn{padding:8px 16px;font-family:'Orbitron';font-size:10px;border:none;border-radius:6px;cursor:pointer}
+    .btn-sm{padding:5px 10px;font-size:9px}
     .btn-primary{background:var(--primary);color:#000}
+    .btn-success{background:var(--success);color:#000}
     .btn-danger{background:var(--danger);color:#fff}
     .btn-ghost{background:transparent;border:1px solid #2a2a40;color:var(--text-dim)}
     .row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-    .input{padding:8px 12px;background:#0a0a12;border:1px solid #2a2a40;border-radius:6px;color:#fff;font-size:12px}
+    .input{padding:8px 12px;background:#0a0a12;border:1px solid #2a2a40;border-radius:6px;color:#fff;font-size:12px;width:100%}
+    .input-sm{padding:5px 8px;font-size:11px}
+    textarea.input{min-height:60px;resize:vertical}
+    
+    /* 라운드 카드 */
+    .round-card{background:#0a0a12;border:2px solid #2a2a40;border-radius:10px;padding:12px;margin-bottom:12px}
+    .round-card.active{border-color:var(--primary)}
+    .round-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer}
+    .round-header .round-num{font-family:'Orbitron';font-size:14px;color:var(--primary);min-width:30px}
+    .round-header .round-name{flex:1}
+    .round-content{display:none;padding-top:10px;border-top:1px solid #2a2a40}
+    .round-card.active .round-content{display:block}
+    
+    /* 스테이지 그리드 */
+    .stage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
+    .stage-card{background:#151520;border:2px solid #2a2a40;border-radius:8px;padding:10px}
+    .stage-card.has-image{border-color:var(--success)}
+    .stage-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .stage-num{font-family:'Orbitron';font-size:11px;color:var(--accent)}
+    .stage-preview{width:100%;height:70px;background:#050508;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+    .stage-preview img,.stage-preview video{width:100%;height:100%;object-fit:cover}
+    .stage-preview .placeholder{color:#333;font-size:20px}
+    .stage-preview .delete-btn{position:absolute;top:4px;right:4px;width:18px;height:18px;background:var(--danger);border:none;border-radius:50%;color:#fff;font-size:9px;cursor:pointer;display:none}
+    .stage-card:hover .delete-btn{display:block}
+    .stage-card input[type="file"]{display:none}
+    .stage-card .upload-btn{width:100%;padding:5px;background:var(--primary);border:none;border-radius:5px;font-family:'Orbitron';font-size:8px;color:#000;cursor:pointer;margin-bottom:6px}
+    .stage-card textarea{width:100%;padding:5px;background:#0a0a12;border:1px solid #2a2a40;border-radius:4px;color:#fff;font-size:10px;resize:none;height:40px}
+    
+    /* 데이터 */
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:12px}
     .stat-card{background:#0a0a12;border:1px solid #2a2a40;border-radius:8px;padding:10px;text-align:center}
     .stat-card .value{font-family:'Orbitron';font-size:18px;color:var(--accent)}
     .stat-card .label{font-size:9px;color:var(--text-dim)}
+    
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);padding:10px 20px;background:rgba(0,0,0,0.95);border:1px solid var(--success);border-radius:20px;font-family:'Orbitron';font-size:10px;color:var(--success);opacity:0;transition:all 0.3s;z-index:999}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .toast.error{border-color:var(--danger);color:var(--danger)}
@@ -56,41 +73,38 @@
 <body>
   <div class="container">
     <h1>⚙️ 네온 브레이커 관리자</h1>
-    <p class="subtitle">Supabase Storage 연동</p>
+    <p class="subtitle">라운드/스테이지/스토리 관리</p>
     
     <div class="status-bar">
       <div class="status-dot" id="statusDot"></div>
       <span id="statusText">연결 중...</span>
+      <button class="btn btn-sm btn-primary" onclick="saveAllData()" style="margin-left:auto">💾 전체 저장</button>
     </div>
     
     <div class="tabs">
-      <button class="tab active" data-tab="thumbs">👤 썸네일</button>
-      <button class="tab" data-tab="stages">🎬 스테이지</button>
+      <button class="tab active" data-tab="rounds">🎮 라운드/스테이지</button>
       <button class="tab" data-tab="data">💾 데이터</button>
     </div>
 
-    <div class="panel active" id="thumbsPanel">
+    <!-- Rounds Panel -->
+    <div class="panel active" id="roundsPanel">
       <div class="section">
-        <div class="section-title">👤 캐릭터 썸네일</div>
-        <div class="upload-grid" id="thumbsGrid"></div>
+        <div class="section-title">
+          <span>🎮 라운드 관리</span>
+          <button class="btn btn-sm btn-success" onclick="addRound()">+ 라운드 추가</button>
+        </div>
+        <div id="roundsList"></div>
       </div>
     </div>
 
-    <div class="panel" id="stagesPanel">
-      <div class="section">
-        <div class="section-title">🎬 스테이지 클리어 이미지</div>
-        <div class="round-tabs" id="roundTabs"></div>
-        <div class="upload-grid" id="stagesGrid"></div>
-      </div>
-    </div>
-
+    <!-- Data Panel -->
     <div class="panel" id="dataPanel">
       <div class="section">
-        <div class="section-title">📊 게임 데이터</div>
+        <div class="section-title"><span>📊 게임 데이터</span></div>
         <div class="stats-grid" id="statsGrid"></div>
       </div>
       <div class="section">
-        <div class="section-title">💰 코인</div>
+        <div class="section-title"><span>💰 코인</span></div>
         <div class="row">
           <input type="number" class="input" id="coinInput" style="width:100px;">
           <button class="btn btn-primary" onclick="setCoins()">설정</button>
@@ -99,7 +113,7 @@
         </div>
       </div>
       <div class="section">
-        <div class="section-title">⚠️ 위험</div>
+        <div class="section-title"><span>⚠️ 위험</span></div>
         <div class="row">
           <button class="btn btn-primary" onclick="unlockAll()">🔓 전체 해금</button>
           <button class="btn btn-danger" onclick="resetData()">🗑️ 초기화</button>
@@ -115,17 +129,46 @@ var SUPABASE_URL = 'https://ealukkcyetnoouslojaa.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhbHVra2N5ZXRub291c2xvamFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5ODkwNjAsImV4cCI6MjA4NDU2NTA2MH0.SQ77IL13Da3FczDKEtEcHwkQCRDKCA1-RaTBjQ5SvE0';
 
 var sb;
-var currentRound = 1;
+var activeRound = 1;
+
+// 라운드/스테이지 데이터
+var gameData = {
+  rounds: [
+    {id:1, name:'챕터 1: 시작', stages:[
+      {id:1, text:'새로운 모험이 시작됩니다...'},
+      {id:2, text:''},
+      {id:3, text:''},
+      {id:4, text:''},
+      {id:5, text:''},
+      {id:6, text:''},
+      {id:7, text:'보스가 나타났다!'}
+    ]},
+    {id:2, name:'챕터 2: 각성', stages:[
+      {id:1, text:''},{id:2, text:''},{id:3, text:''},{id:4, text:''},{id:5, text:''},{id:6, text:''},{id:7, text:''}
+    ]},
+    {id:3, name:'챕터 3: 시련', stages:[
+      {id:1, text:''},{id:2, text:''},{id:3, text:''},{id:4, text:''},{id:5, text:''},{id:6, text:''},{id:7, text:''}
+    ]}
+  ]
+};
 
 window.onload = async function(){
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  loadGameData();
   await checkConnection();
   setupTabs();
-  renderThumbs();
-  renderRoundTabs();
-  renderStages();
+  renderRounds();
   renderStats();
 };
+
+function loadGameData(){
+  var saved = localStorage.getItem('nb_gamedata');
+  if(saved) gameData = JSON.parse(saved);
+}
+
+function saveGameData(){
+  localStorage.setItem('nb_gamedata', JSON.stringify(gameData));
+}
 
 async function checkConnection(){
   try {
@@ -149,106 +192,126 @@ function setupTabs(){
   });
 }
 
-// ===== 썸네일 =====
-async function renderThumbs(){
-  var grid = document.getElementById('thumbsGrid');
+// ===== 라운드 관리 =====
+function renderRounds(){
   var html = '';
-  for(var i = 1; i <= 6; i++){
-    html += '<div class="upload-card" id="thumbCard' + i + '">';
-    html += '<div class="preview" id="thumbPrev' + i + '"><span class="placeholder">👤</span></div>';
-    html += '<div class="label">캐릭터 ' + i + '</div>';
-    html += '<input type="file" accept="image/*" id="thumbInput' + i + '" onchange="uploadThumb(' + i + ')">';
-    html += '<button class="upload-btn" onclick="document.getElementById(\'thumbInput' + i + '\').click()">📷 업로드</button>';
+  gameData.rounds.forEach(function(round, idx){
+    var isActive = round.id === activeRound;
+    html += '<div class="round-card' + (isActive ? ' active' : '') + '" data-round="' + round.id + '">';
+    html += '<div class="round-header" onclick="toggleRound(' + round.id + ')">';
+    html += '<span class="round-num">R' + round.id + '</span>';
+    html += '<input type="text" class="input input-sm round-name" value="' + round.name + '" onclick="event.stopPropagation()" onchange="updateRoundName(' + round.id + ', this.value)">';
+    html += '<button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteRound(' + round.id + ')">삭제</button>';
     html += '</div>';
-  }
-  grid.innerHTML = html;
+    html += '<div class="round-content">';
+    html += '<div class="row"><button class="btn btn-sm btn-success" onclick="addStage(' + round.id + ')">+ 스테이지 추가</button></div>';
+    html += '<div class="stage-grid">';
+    round.stages.forEach(function(stage){
+      var key = 'r' + round.id + '_s' + stage.id;
+      html += '<div class="stage-card" id="stageCard_' + key + '">';
+      html += '<div class="stage-header"><span class="stage-num">S' + stage.id + '</span>';
+      html += '<button class="btn btn-sm btn-danger" onclick="deleteStage(' + round.id + ',' + stage.id + ')">X</button></div>';
+      html += '<div class="stage-preview" id="stagePrev_' + key + '"><span class="placeholder">🎬</span></div>';
+      html += '<input type="file" accept="image/*,video/*" id="stageInput_' + key + '" onchange="uploadStage(\'' + key + '\')">';
+      html += '<button class="upload-btn" onclick="document.getElementById(\'stageInput_' + key + '\').click()">📷 이미지 업로드</button>';
+      html += '<textarea placeholder="스토리 텍스트..." onchange="updateStageText(' + round.id + ',' + stage.id + ',this.value)">' + (stage.text || '') + '</textarea>';
+      html += '</div>';
+    });
+    html += '</div></div></div>';
+  });
+  document.getElementById('roundsList').innerHTML = html;
   
-  for(var i = 1; i <= 6; i++) loadThumb(i);
+  // 이미지 로드
+  gameData.rounds.forEach(function(round){
+    round.stages.forEach(function(stage){
+      loadStageImage('r' + round.id + '_s' + stage.id);
+    });
+  });
 }
 
-async function loadThumb(id){
-  var { data } = await sb.storage.from('thumbs').list();
-  var file = data.find(f => f.name.startsWith('char_' + id));
-  if(file){
-    var { data: urlData } = sb.storage.from('thumbs').getPublicUrl(file.name);
-    var prev = document.getElementById('thumbPrev' + id);
-    prev.innerHTML = '<img src="' + urlData.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteThumb(' + id + ',\'' + file.name + '\')">✕</button>';
-    document.getElementById('thumbCard' + id).classList.add('has-image');
-  }
+function toggleRound(id){
+  activeRound = (activeRound === id) ? null : id;
+  renderRounds();
 }
 
-async function uploadThumb(id){
-  var input = document.getElementById('thumbInput' + id);
-  var file = input.files[0];
-  if(!file) return;
-  
-  toast('업로드 중...');
-  
-  // 기존 삭제
-  var { data: list } = await sb.storage.from('thumbs').list();
-  var old = list.filter(f => f.name.startsWith('char_' + id));
-  if(old.length) await sb.storage.from('thumbs').remove(old.map(f => f.name));
-  
-  var ext = file.name.split('.').pop();
-  var { error } = await sb.storage.from('thumbs').upload('char_' + id + '.' + ext, file);
-  
-  if(error) toast('실패: ' + error.message, true);
-  else { toast('완료!'); loadThumb(id); }
+function addRound(){
+  var newId = gameData.rounds.length > 0 ? Math.max(...gameData.rounds.map(r => r.id)) + 1 : 1;
+  gameData.rounds.push({
+    id: newId,
+    name: '챕터 ' + newId,
+    stages: [
+      {id:1, text:''},{id:2, text:''},{id:3, text:''},{id:4, text:''},{id:5, text:''},{id:6, text:''},{id:7, text:''}
+    ]
+  });
+  saveGameData();
+  activeRound = newId;
+  renderRounds();
+  toast('라운드 추가됨!');
 }
 
-async function deleteThumb(id, name){
-  await sb.storage.from('thumbs').remove([name]);
-  document.getElementById('thumbPrev' + id).innerHTML = '<span class="placeholder">👤</span>';
-  document.getElementById('thumbCard' + id).classList.remove('has-image');
-  toast('삭제됨');
+function deleteRound(id){
+  if(gameData.rounds.length <= 1){ toast('최소 1개 필요!', true); return; }
+  if(!confirm('라운드 ' + id + ' 삭제?')) return;
+  gameData.rounds = gameData.rounds.filter(r => r.id !== id);
+  saveGameData();
+  renderRounds();
+  toast('삭제됨!');
 }
 
-// ===== 스테이지 =====
-function renderRoundTabs(){
-  var html = '';
-  for(var r = 1; r <= 6; r++){
-    html += '<button class="round-tab' + (r===currentRound?' active':'') + '" onclick="selectRound(' + r + ')">R' + r + '</button>';
-  }
-  document.getElementById('roundTabs').innerHTML = html;
+function updateRoundName(id, name){
+  var round = gameData.rounds.find(r => r.id === id);
+  if(round) round.name = name;
+  saveGameData();
 }
 
-function selectRound(r){
-  currentRound = r;
-  renderRoundTabs();
-  renderStages();
+// ===== 스테이지 관리 =====
+function addStage(roundId){
+  var round = gameData.rounds.find(r => r.id === roundId);
+  if(!round) return;
+  var newId = round.stages.length > 0 ? Math.max(...round.stages.map(s => s.id)) + 1 : 1;
+  round.stages.push({id: newId, text: ''});
+  saveGameData();
+  renderRounds();
+  toast('스테이지 추가됨!');
 }
 
-async function renderStages(){
-  var grid = document.getElementById('stagesGrid');
-  var html = '';
-  for(var s = 1; s <= 7; s++){
-    var key = 'r' + currentRound + '_s' + s;
-    html += '<div class="upload-card" id="stageCard_' + key + '">';
-    html += '<div class="preview" id="stagePrev_' + key + '"><span class="placeholder">🎬</span></div>';
-    html += '<div class="label">스테이지 ' + s + '</div>';
-    html += '<input type="file" accept="image/*,video/*" id="stageInput_' + key + '" onchange="uploadStage(\'' + key + '\')">';
-    html += '<button class="upload-btn" onclick="document.getElementById(\'stageInput_' + key + '\').click()">📷 업로드</button>';
-    html += '</div>';
-  }
-  grid.innerHTML = html;
-  
-  for(var s = 1; s <= 7; s++) loadStage('r' + currentRound + '_s' + s);
+function deleteStage(roundId, stageId){
+  var round = gameData.rounds.find(r => r.id === roundId);
+  if(!round) return;
+  if(round.stages.length <= 1){ toast('최소 1개 필요!', true); return; }
+  round.stages = round.stages.filter(s => s.id !== stageId);
+  saveGameData();
+  renderRounds();
+  toast('삭제됨!');
 }
 
-async function loadStage(key){
-  var { data } = await sb.storage.from('secret').list();
-  var file = data.find(f => f.name.startsWith(key));
-  if(file){
-    var { data: urlData } = sb.storage.from('secret').getPublicUrl(file.name);
-    var prev = document.getElementById('stagePrev_' + key);
-    var isVideo = file.name.endsWith('.mp4') || file.name.endsWith('.webm');
-    if(isVideo){
-      prev.innerHTML = '<video src="' + urlData.publicUrl + '?' + Date.now() + '" autoplay muted loop></video><button class="delete-btn" onclick="deleteStage(\'' + key + '\',\'' + file.name + '\')">✕</button>';
-    } else {
-      prev.innerHTML = '<img src="' + urlData.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteStage(\'' + key + '\',\'' + file.name + '\')">✕</button>';
+function updateStageText(roundId, stageId, text){
+  var round = gameData.rounds.find(r => r.id === roundId);
+  if(!round) return;
+  var stage = round.stages.find(s => s.id === stageId);
+  if(stage) stage.text = text;
+  saveGameData();
+}
+
+// ===== 이미지 업로드 =====
+async function loadStageImage(key){
+  try {
+    var { data } = await sb.storage.from('secret').list();
+    var file = data.find(f => f.name.startsWith(key + '.'));
+    if(file){
+      var { data: urlData } = sb.storage.from('secret').getPublicUrl(file.name);
+      var prev = document.getElementById('stagePrev_' + key);
+      var card = document.getElementById('stageCard_' + key);
+      if(!prev || !card) return;
+      var isVideo = file.name.endsWith('.mp4') || file.name.endsWith('.webm');
+      if(isVideo){
+        prev.innerHTML = '<video src="' + urlData.publicUrl + '?' + Date.now() + '" autoplay muted loop></video><button class="delete-btn" onclick="deleteStageImage(\'' + key + '\',\'' + file.name + '\')">✕</button>';
+      } else {
+        prev.innerHTML = '<img src="' + urlData.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteStageImage(\'' + key + '\',\'' + file.name + '\')">✕</button>';
+      }
+      card.classList.add('has-image');
     }
-    document.getElementById('stageCard_' + key).classList.add('has-image');
-  }
+  } catch(e){}
 }
 
 async function uploadStage(key){
@@ -258,21 +321,28 @@ async function uploadStage(key){
   
   toast('업로드 중...');
   
-  var { data: list } = await sb.storage.from('secret').list();
-  var old = list.filter(f => f.name.startsWith(key));
-  if(old.length) await sb.storage.from('secret').remove(old.map(f => f.name));
-  
-  var ext = file.name.split('.').pop();
-  var { error } = await sb.storage.from('secret').upload(key + '.' + ext, file);
-  
-  if(error) toast('실패: ' + error.message, true);
-  else { toast('완료!'); loadStage(key); }
+  try {
+    var { data: list } = await sb.storage.from('secret').list();
+    var old = list.filter(f => f.name.startsWith(key + '.'));
+    if(old.length) await sb.storage.from('secret').remove(old.map(f => f.name));
+    
+    var ext = file.name.split('.').pop();
+    var { error } = await sb.storage.from('secret').upload(key + '.' + ext, file);
+    
+    if(error) throw error;
+    toast('완료!');
+    loadStageImage(key);
+  } catch(e){
+    toast('실패: ' + e.message, true);
+  }
 }
 
-async function deleteStage(key, name){
+async function deleteStageImage(key, name){
   await sb.storage.from('secret').remove([name]);
-  document.getElementById('stagePrev_' + key).innerHTML = '<span class="placeholder">🎬</span>';
-  document.getElementById('stageCard_' + key).classList.remove('has-image');
+  var prev = document.getElementById('stagePrev_' + key);
+  var card = document.getElementById('stageCard_' + key);
+  if(prev) prev.innerHTML = '<span class="placeholder">🎬</span>';
+  if(card) card.classList.remove('has-image');
   toast('삭제됨');
 }
 
@@ -283,7 +353,8 @@ function renderStats(){
   document.getElementById('coinInput').value = coins;
   document.getElementById('statsGrid').innerHTML = 
     '<div class="stat-card"><div class="value">' + coins.toLocaleString() + '</div><div class="label">코인</div></div>' +
-    '<div class="stat-card"><div class="value">' + round + '</div><div class="label">라운드</div></div>';
+    '<div class="stat-card"><div class="value">' + round + '</div><div class="label">라운드</div></div>' +
+    '<div class="stat-card"><div class="value">' + gameData.rounds.length + '</div><div class="label">총 라운드</div></div>';
 }
 
 function setCoins(){
@@ -311,6 +382,11 @@ function unlockAll(){
 
 function resetData(){
   if(confirm('초기화?')){ localStorage.clear(); location.reload(); }
+}
+
+function saveAllData(){
+  saveGameData();
+  toast('전체 저장 완료!');
 }
 
 function toast(msg, err){

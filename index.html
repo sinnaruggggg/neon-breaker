@@ -10,7 +10,7 @@
     *{margin:0;padding:0;box-sizing:border-box;user-select:none}
     html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);touch-action:none}
     #app{width:100%;height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#08080f 0%,#0f0f1a 50%,#08080f 100%)}
-    #header{height:50px;padding:0 12px;background:linear-gradient(180deg,rgba(0,0,0,0.9),transparent);display:flex;align-items:center;justify-content:space-between}
+    #header{height:50px;padding:0 12px;background:linear-gradient(180deg,rgba(0,0,0,0.9),transparent);display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10}
     .hud-group{display:flex;align-items:center;gap:12px}
     .hud-stat{display:flex;flex-direction:column;align-items:center}
     .hud-stat .label{font-size:8px;color:var(--text-dim)}
@@ -22,10 +22,7 @@
     #pauseBtn{width:40px;height:40px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center}
     #gameArea{flex:1;position:relative;overflow:hidden}
     #gameCanvas{width:100%;height:100%;display:block}
-    #comboPopup,#stagePopup{position:absolute;left:50%;transform:translateX(-50%);font-family:'Orbitron';pointer-events:none;opacity:0;transition:all 0.3s}
-    #comboPopup{top:30%;font-size:24px;font-weight:900;color:var(--accent)}
-    #stagePopup{top:45%;font-size:18px;color:var(--primary)}
-    #controls{height:160px;padding:8px 10px;background:linear-gradient(180deg,rgba(15,15,25,0.98),var(--bg));border-top:1px solid rgba(0,240,255,0.15)}
+    #controls{height:160px;padding:8px 10px;background:linear-gradient(180deg,rgba(15,15,25,0.98),var(--bg));border-top:1px solid rgba(0,240,255,0.15);position:relative;z-index:10}
     #skillBar{display:flex;justify-content:center;gap:10px;margin-bottom:8px}
     .skill-btn{width:48px;height:48px;background:var(--card);border:2px solid #333;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;opacity:0.4}
     .skill-btn.unlocked{opacity:1;border-color:var(--secondary)}
@@ -35,6 +32,8 @@
     #moveBar{display:flex;justify-content:space-between;align-items:center;padding:0 5px}
     .dir-btn{width:64px;height:64px;background:var(--card);border:2px solid var(--primary);border-radius:50%;color:var(--primary);font-size:24px;display:flex;align-items:center;justify-content:center}
     #fireBtn{width:75px;height:75px;background:linear-gradient(145deg,#ff0066,#bb0044);border:3px solid #ff4488;border-radius:50%;font-family:'Orbitron';font-size:11px;font-weight:900;color:#fff}
+    
+    /* 오버레이 */
     .overlay{position:absolute;inset:0;background:rgba(5,5,12,0.97);display:flex;flex-direction:column;align-items:center;padding:15px;overflow-y:auto;z-index:100}
     .overlay.hidden{display:none}
     .overlay-inner{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center}
@@ -48,6 +47,8 @@
     .btn-secondary{background:linear-gradient(135deg,var(--secondary),#aa0066);color:#fff}
     .btn-gold{background:linear-gradient(135deg,var(--accent),#aa8800);color:#000}
     .btn-ghost{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);color:var(--text-dim)}
+    
+    /* 상점 */
     .shop-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;justify-content:center}
     .shop-tab{padding:8px 14px;background:transparent;border:1px solid #333;border-radius:8px;font-size:11px;color:var(--text-dim);cursor:pointer}
     .shop-tab.active{background:var(--primary);color:#000;border-color:var(--primary)}
@@ -67,8 +68,8 @@
     .shop-btn-buy:disabled{background:#333;color:#666}
     .shop-btn-max{background:#2a2a40;color:var(--success)}
     .unlock-req{font-size:9px;color:var(--secondary);margin-top:2px}
-    #toast{position:fixed;bottom:180px;left:50%;transform:translateX(-50%) translateY(50px);padding:12px 24px;background:rgba(0,0,0,0.92);border:1px solid var(--primary);border-radius:25px;font-family:'Orbitron';font-size:11px;color:var(--primary);opacity:0;transition:all 0.3s;z-index:999;pointer-events:none}
-    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    
+    /* 캐릭터 */
     .char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:320px;margin:12px 0}
     .char-card{background:var(--card);border:2px solid #2a2a40;border-radius:12px;padding:8px;text-align:center;cursor:pointer}
     .char-card:hover{border-color:var(--primary)}
@@ -77,6 +78,22 @@
     .char-card .thumb{width:100%;height:80px;border-radius:8px;margin-bottom:5px;overflow:hidden;background:#1a1a2f;display:flex;align-items:center;justify-content:center}
     .char-card .thumb img{width:100%;height:100%;object-fit:cover}
     .char-card .char-name{font-family:'Orbitron';font-size:9px;color:var(--text-dim)}
+    
+    /* 스테이지 클리어 - 전체화면 */
+    .stage-clear-overlay{position:fixed;inset:0;background:#000;z-index:200;display:flex;flex-direction:column}
+    .stage-clear-overlay.hidden{display:none}
+    .stage-clear-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+    .stage-clear-bg img,.stage-clear-bg video{width:100%;height:100%;object-fit:cover}
+    .stage-clear-content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:20px}
+    .story-box{background:linear-gradient(transparent,rgba(0,0,0,0.9) 30%);padding:60px 20px 20px;margin:-40px -20px 0}
+    .story-text{font-size:16px;line-height:1.6;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.8);margin-bottom:15px;min-height:50px}
+    .stage-clear-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+    .stage-clear-title{font-family:'Orbitron';font-size:18px;color:var(--primary)}
+    .stage-clear-reward{font-family:'Orbitron';font-size:14px;color:var(--accent)}
+    .stage-clear-btn{width:100%;padding:15px;font-family:'Orbitron';font-size:14px;font-weight:700;background:linear-gradient(135deg,var(--primary),#0088aa);color:#000;border:none;border-radius:12px;cursor:pointer}
+    
+    #toast{position:fixed;bottom:180px;left:50%;transform:translateX(-50%) translateY(50px);padding:12px 24px;background:rgba(0,0,0,0.92);border:1px solid var(--primary);border-radius:25px;font-family:'Orbitron';font-size:11px;color:var(--primary);opacity:0;transition:all 0.3s;z-index:999;pointer-events:none}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   </style>
 </head>
 <body>
@@ -92,7 +109,7 @@
         <button id="pauseBtn">❚❚</button>
       </div>
     </div>
-    <div id="gameArea"><canvas id="gameCanvas"></canvas><div id="comboPopup"></div><div id="stagePopup"></div></div>
+    <div id="gameArea"><canvas id="gameCanvas"></canvas></div>
     <div id="controls">
       <div id="skillBar">
         <button class="skill-btn" id="skill1"><span class="icon">🔥</span><span class="lvl" id="skill1Lvl">-</span><div class="cd-fill" id="cd1"></div></button>
@@ -157,13 +174,20 @@
       <button class="btn btn-ghost" id="gameOverMenuBtn">메인 메뉴</button>
     </div></div>
 
-    <!-- Stage Clear -->
-    <div class="overlay hidden" id="stageClearScreen"><div class="overlay-inner">
-      <div class="brand"><h1>스테이지 클리어!</h1></div>
-      <div id="stageMediaContainer" style="margin:15px 0;min-height:50px;display:flex;justify-content:center;align-items:center;"></div>
-      <div class="coin-badge"><span>+</span><span class="amount" id="stageReward">0</span><span>🪙</span></div>
-      <button class="btn btn-primary" id="nextStageBtn">다음 스테이지 →</button>
-    </div></div>
+    <!-- Stage Clear - 전체화면 -->
+    <div class="stage-clear-overlay hidden" id="stageClearScreen">
+      <div class="stage-clear-bg" id="stageClearBg"></div>
+      <div class="stage-clear-content">
+        <div class="story-box">
+          <div class="story-text" id="storyText"></div>
+          <div class="stage-clear-info">
+            <span class="stage-clear-title" id="stageClearTitle">스테이지 클리어!</span>
+            <span class="stage-clear-reward">+<span id="stageReward">0</span> 🪙</span>
+          </div>
+          <button class="stage-clear-btn" id="nextStageBtn">다음 스테이지 →</button>
+        </div>
+      </div>
+    </div>
 
     <div id="toast"></div>
   </div>
@@ -191,7 +215,6 @@ var STG = {
 };
 
 // ========== 상점 데이터 ==========
-// 무기: 레벨업하면 발사 데미지 증가
 var WEAPONS = [
   {id:'w1',name:'기본 캐논',icon:'🔫',desc:'기본 무기',baseDmg:1,maxLv:10,basePrice:100,priceUp:50},
   {id:'w2',name:'더블 샷',icon:'💨',desc:'2발 동시 발사',baseDmg:1,maxLv:10,basePrice:200,priceUp:100,unlockReq:'w1'},
@@ -199,7 +222,6 @@ var WEAPONS = [
   {id:'w4',name:'미사일',icon:'🚀',desc:'유도 미사일',baseDmg:3,maxLv:10,basePrice:800,priceUp:200,unlockReq:'w3'}
 ];
 
-// 스킬: 순서대로 해금 (관통 → 번개 → 폭탄 → 쿨타임감소)
 var SKILLS = [
   {id:'s1',name:'관통',icon:'🔥',desc:'공이 벽돌 관통',maxLv:5,basePrice:300,priceUp:150,duration:3000,durationUp:500},
   {id:'s2',name:'번개',icon:'⚡',desc:'랜덤 벽돌 파괴',maxLv:5,basePrice:500,priceUp:200,hits:2,hitsUp:1,unlockReq:'s1'},
@@ -207,7 +229,6 @@ var SKILLS = [
   {id:'s4',name:'가속',icon:'⏱️',desc:'쿨타임 감소',maxLv:5,basePrice:1000,priceUp:300,cdReduce:0.1,unlockReq:'s3'}
 ];
 
-// 패들 업그레이드
 var PADDLE_UPGRADES = [
   {id:'p_width',name:'패들 길이',icon:'📏',desc:'패들이 길어짐',maxLv:10,basePrice:150,priceUp:75,effect:0.05},
   {id:'p_magnet',name:'자석',icon:'🧲',desc:'아이템 끌어당김',maxLv:5,basePrice:400,priceUp:200,effect:20},
@@ -216,14 +237,12 @@ var PADDLE_UPGRADES = [
   {id:'p_multi',name:'멀티볼',icon:'⚪',desc:'시작 공 개수',maxLv:3,basePrice:1000,priceUp:500,effect:1}
 ];
 
-// 공 업그레이드
 var BALL_UPGRADES = [
   {id:'b_dmg',name:'공 데미지',icon:'💪',desc:'벽돌 데미지 증가',maxLv:10,basePrice:200,priceUp:100,effect:1},
   {id:'b_speed',name:'공 속도',icon:'💨',desc:'공이 빨라짐',maxLv:5,basePrice:300,priceUp:150,effect:0.3},
   {id:'b_size',name:'공 크기',icon:'🔵',desc:'공이 커짐',maxLv:5,basePrice:250,priceUp:125,effect:1}
 ];
 
-// 캐릭터
 var CHARACTERS = [
   {id:1,name:'미스터리 걸',unlocked:true},
   {id:2,name:'선셋 뷰티',unlocked:false},
@@ -233,6 +252,13 @@ var CHARACTERS = [
   {id:6,name:'실버 문',unlocked:false}
 ];
 
+// 게임 데이터 (관리자에서 설정)
+var gameData = {
+  rounds: [
+    {id:1, name:'챕터 1', stages:[{id:1,text:''},{id:2,text:''},{id:3,text:''},{id:4,text:''},{id:5,text:''},{id:6,text:''},{id:7,text:''}]}
+  ]
+};
+
 // ========== 게임 상태 ==========
 var canvas, ctx;
 var state = 'menu';
@@ -241,15 +267,11 @@ var round = 1, stage = 1, earned = 0;
 var selectedChar = 1;
 var currentTab = 'weapon';
 var returnTo = 'menu';
-
-// 업그레이드 레벨 저장
 var upgrades = {};
-
-// 게임 오브젝트
 var paddle, balls, bullets, bricks, items, fx, particles;
 var input = {left:false, right:false, fire:false};
 var lastFire = 0, skillCD = [0,0,0,0];
-var catching = false, catchTimer = 0;
+var catching = false;
 
 // ========== 초기화 ==========
 window.onload = function(){
@@ -268,15 +290,19 @@ window.onload = function(){
 function loadData(){
   coins = parseInt(localStorage.getItem('nb_coins')) || 0;
   round = parseInt(localStorage.getItem('nb_round')) || 1;
+  stage = parseInt(localStorage.getItem('nb_stage')) || 1;
   upgrades = JSON.parse(localStorage.getItem('nb_upgrades')) || {};
   selectedChar = parseInt(localStorage.getItem('nb_char')) || 1;
   var chars = JSON.parse(localStorage.getItem('nb_characters'));
   if(chars) CHARACTERS = chars;
+  var gd = localStorage.getItem('nb_gamedata');
+  if(gd) gameData = JSON.parse(gd);
 }
 
 function saveData(){
   localStorage.setItem('nb_coins', coins);
   localStorage.setItem('nb_round', round);
+  localStorage.setItem('nb_stage', stage);
   localStorage.setItem('nb_upgrades', JSON.stringify(upgrades));
   localStorage.setItem('nb_char', selectedChar);
   localStorage.setItem('nb_characters', JSON.stringify(CHARACTERS));
@@ -288,7 +314,6 @@ function resize(){
   canvas.height = area.clientHeight;
 }
 
-// ========== 업그레이드 헬퍼 ==========
 function getLv(id){ return upgrades[id] || 0; }
 function setLv(id, lv){ upgrades[id] = lv; saveData(); }
 
@@ -308,7 +333,6 @@ function canBuy(item){
   return coins >= getPrice(item);
 }
 
-// ========== UI 업데이트 ==========
 function updateUI(){
   document.getElementById('menuCoins').textContent = coins.toLocaleString();
   document.getElementById('shopCoins').textContent = coins.toLocaleString();
@@ -331,7 +355,6 @@ function updateSkillButtons(){
     var lv = getLv(skill.id);
     var btn = document.getElementById('skill' + i);
     var lvSpan = document.getElementById('skill' + i + 'Lvl');
-    
     if(lv > 0){
       btn.classList.add('unlocked');
       lvSpan.textContent = 'Lv.' + lv;
@@ -349,11 +372,10 @@ function toast(msg){
   setTimeout(function(){ t.classList.remove('show'); }, 2000);
 }
 
-// ========== 상점 렌더링 ==========
+// ========== 상점 ==========
 function renderShop(){
   var list = document.getElementById('shopList');
   var items = [];
-  
   if(currentTab === 'weapon') items = WEAPONS;
   else if(currentTab === 'skill') items = SKILLS;
   else if(currentTab === 'paddle') items = PADDLE_UPGRADES;
@@ -371,7 +393,6 @@ function renderShop(){
     html += '<div class="info">';
     html += '<div class="name">' + item.name + '</div>';
     html += '<div class="desc">' + item.desc + '</div>';
-    
     if(unlocked){
       html += '<div class="level">Lv.' + lv + ' / ' + item.maxLv + '</div>';
       html += '<div class="level-bar"><div class="level-fill" style="width:' + (lv/item.maxLv*100) + '%"></div></div>';
@@ -379,15 +400,12 @@ function renderShop(){
       var reqItem = items.find(function(x){ return x.id === item.unlockReq; });
       html += '<div class="unlock-req">🔒 ' + (reqItem ? reqItem.name : '') + ' Lv.5 필요</div>';
     }
-    
     html += '</div>';
-    
     if(maxed){
       html += '<button class="shop-btn shop-btn-max" disabled>MAX</button>';
     } else if(unlocked){
       html += '<button class="shop-btn shop-btn-buy" data-id="' + item.id + '" ' + (canAfford ? '' : 'disabled') + '>🪙' + price + '</button>';
     }
-    
     html += '</div>';
     return html;
   }).join('');
@@ -401,18 +419,31 @@ function buyUpgrade(id){
   var allItems = WEAPONS.concat(SKILLS).concat(PADDLE_UPGRADES).concat(BALL_UPGRADES);
   var item = allItems.find(function(x){ return x.id === id; });
   if(!item || !canBuy(item)) return;
-  
   coins -= getPrice(item);
   setLv(id, getLv(id) + 1);
   updateUI();
   updateSkillButtons();
   renderShop();
-  toast(item.name + ' Lv.' + getLv(id) + ' 업그레이드!');
+  toast(item.name + ' Lv.' + getLv(id) + '!');
 }
 
 // ========== 게임 로직 ==========
+function getRoundData(){
+  return gameData.rounds.find(function(r){ return r.id === round; }) || gameData.rounds[0];
+}
+
+function getStageData(){
+  var rd = getRoundData();
+  return rd.stages.find(function(s){ return s.id === stage; }) || rd.stages[0];
+}
+
+function getMaxStages(){
+  var rd = getRoundData();
+  return rd ? rd.stages.length : 7;
+}
+
 function getStageCfg(){
-  var cfg = STG[stage] || STG[7];
+  var cfg = STG[Math.min(stage, 7)] || STG[7];
   var bonus = (round - 1) * 0.2;
   return {
     r: Math.min(8, cfg.r + Math.floor(bonus)),
@@ -493,14 +524,11 @@ function makeBricks(){
 function update(){
   if(state !== 'playing') return;
   
-  // 패들 이동
   if(input.left) paddle.x = Math.max(0, paddle.x - paddle.speed);
   if(input.right) paddle.x = Math.min(canvas.width - paddle.w, paddle.x + paddle.speed);
   
-  // 발사
   if(input.fire){
     if(catching){
-      // 공 잡기 해제
       catching = false;
       balls.forEach(function(b){
         if(b.attached){
@@ -528,7 +556,6 @@ function update(){
   updateSkillCD();
   updateHUD();
   
-  // 승리/패배 체크
   if(bricks.length === 0) stageClear();
   if(balls.length === 0){
     lives--;
@@ -550,7 +577,6 @@ function updateBalls(){
       continue;
     }
     
-    // 관통 타이머
     if(b.piercing){
       b.pierceTime -= 16;
       if(b.pierceTime <= 0) b.piercing = false;
@@ -559,17 +585,13 @@ function updateBalls(){
     b.x += b.dx;
     b.y += b.dy;
     
-    // 벽 충돌
     if(b.x <= b.r){ b.x = b.r; b.dx = Math.abs(b.dx); }
     if(b.x >= canvas.width - b.r){ b.x = canvas.width - b.r; b.dx = -Math.abs(b.dx); }
     if(b.y <= b.r){ b.y = b.r; b.dy = Math.abs(b.dy); }
     
-    // 패들 충돌
     if(b.dy > 0 && b.y + b.r >= paddle.y && b.y - b.r <= paddle.y + paddle.h &&
        b.x >= paddle.x - b.r && b.x <= paddle.x + paddle.w + b.r){
-      
       if(catchLv > 0 && !catching){
-        // 공 잡기
         catching = true;
         b.attached = true;
         b.dx = 0;
@@ -582,16 +604,12 @@ function updateBalls(){
       }
     }
     
-    // 벽돌 충돌
     for(var j = bricks.length - 1; j >= 0; j--){
       var br = bricks[j];
       if(b.x + b.r > br.x && b.x - b.r < br.x + br.w &&
          b.y + b.r > br.y && b.y - b.r < br.y + br.h){
-        
         hitBrick(br, j, b.dmg);
-        
         if(!b.piercing){
-          // 반사
           var ox = Math.min(b.x + b.r - br.x, br.x + br.w - (b.x - b.r));
           var oy = Math.min(b.y + b.r - br.y, br.y + br.h - (b.y - b.r));
           if(ox < oy) b.dx *= -1;
@@ -601,7 +619,6 @@ function updateBalls(){
       }
     }
     
-    // 화면 밖
     if(b.y > canvas.height + 20){
       balls.splice(i, 1);
     }
@@ -610,8 +627,7 @@ function updateBalls(){
 
 function fireWeapon(){
   var now = Date.now();
-  var fireRate = 400;
-  if(now - lastFire < fireRate) return;
+  if(now - lastFire < 400) return;
   lastFire = now;
   
   var wpnLv = Math.max(1, getLv('w1'), getLv('w2'), getLv('w3'), getLv('w4'));
@@ -620,17 +636,13 @@ function fireWeapon(){
   var cy = paddle.y;
   
   if(getLv('w4') > 0){
-    // 미사일
     bullets.push({x:cx, y:cy, dx:0, dy:-8, dmg:dmg*3, type:'missile', homing:true});
   } else if(getLv('w3') > 0){
-    // 레이저
     bullets.push({x:cx, y:cy, dx:0, dy:-12, dmg:dmg*2, type:'laser', pierce:true, w:6, h:20});
   } else if(getLv('w2') > 0){
-    // 더블샷
     bullets.push({x:cx-10, y:cy, dx:-1, dy:-10, dmg:dmg, type:'normal'});
     bullets.push({x:cx+10, y:cy, dx:1, dy:-10, dmg:dmg, type:'normal'});
   } else if(getLv('w1') > 0){
-    // 기본
     bullets.push({x:cx, y:cy, dx:0, dy:-10, dmg:dmg, type:'normal'});
   }
 }
@@ -639,7 +651,6 @@ function updateBullets(){
   for(var i = bullets.length - 1; i >= 0; i--){
     var b = bullets[i];
     
-    // 유도
     if(b.homing && bricks.length > 0){
       var target = bricks[0];
       var tx = target.x + target.w/2;
@@ -659,7 +670,6 @@ function updateBullets(){
       continue;
     }
     
-    // 벽돌 충돌
     for(var j = bricks.length - 1; j >= 0; j--){
       var br = bricks[j];
       var bw = b.w || 8;
@@ -667,9 +677,7 @@ function updateBullets(){
       if(b.x + bw/2 > br.x && b.x - bw/2 < br.x + br.w &&
          b.y + bh/2 > br.y && b.y - bh/2 < br.y + br.h){
         hitBrick(br, j, b.dmg);
-        if(!b.pierce){
-          bullets.splice(i, 1);
-        }
+        if(!b.pierce) bullets.splice(i, 1);
         break;
       }
     }
@@ -678,22 +686,14 @@ function updateBullets(){
 
 function hitBrick(br, idx, dmg){
   br.hp -= dmg;
-  
-  // 파티클
   for(var i = 0; i < 4; i++){
     particles.push({
-      x: br.x + br.w/2,
-      y: br.y + br.h/2,
-      dx: (Math.random()-0.5)*5,
-      dy: (Math.random()-0.5)*5,
-      life: 15,
-      hue: br.hue
+      x: br.x + br.w/2, y: br.y + br.h/2,
+      dx: (Math.random()-0.5)*5, dy: (Math.random()-0.5)*5,
+      life: 15, hue: br.hue
     });
   }
-  
-  if(br.hp <= 0){
-    destroyBrick(br, idx);
-  }
+  if(br.hp <= 0) destroyBrick(br, idx);
 }
 
 function destroyBrick(br, idx){
@@ -701,70 +701,42 @@ function destroyBrick(br, idx){
   coins += reward;
   earned += reward;
   score += 10;
-  
-  // 아이템 드롭
-  if(Math.random() < CFG.DROP_RATE){
-    spawnItem(br.x + br.w/2, br.y + br.h/2);
-  }
-  
+  if(Math.random() < CFG.DROP_RATE) spawnItem(br.x + br.w/2, br.y + br.h/2);
   bricks.splice(idx, 1);
   updateUI();
 }
 
 function spawnItem(x, y){
-  var types = [
-    {t:'life', icon:'♥', color:'#f55'},
-    {t:'coin', icon:'🪙', color:'#fd0'},
-    {t:'power', icon:'⬆', color:'#0ff'}
-  ];
+  var types = [{t:'life',icon:'♥',color:'#f55'},{t:'coin',icon:'🪙',color:'#fd0'},{t:'power',icon:'⬆',color:'#0ff'}];
   var item = types[Math.floor(Math.random() * types.length)];
   items.push({x:x, y:y, dy:2, type:item.t, icon:item.icon, color:item.color});
 }
 
 function updateItems(){
   var magnetRange = getLv('p_magnet') * 20;
-  
   for(var i = items.length - 1; i >= 0; i--){
     var it = items[i];
     it.y += it.dy;
-    
-    // 자석
     if(magnetRange > 0){
       var dx = paddle.x + paddle.w/2 - it.x;
       var dy = paddle.y - it.y;
       var dist = Math.sqrt(dx*dx + dy*dy);
-      if(dist < magnetRange){
-        it.x += dx * 0.1;
-        it.y += dy * 0.1;
-      }
+      if(dist < magnetRange){ it.x += dx * 0.1; it.y += dy * 0.1; }
     }
-    
-    // 패들 충돌
     if(it.y + 10 >= paddle.y && it.y - 10 <= paddle.y + paddle.h &&
        it.x >= paddle.x - 10 && it.x <= paddle.x + paddle.w + 10){
       collectItem(it);
       items.splice(i, 1);
       continue;
     }
-    
-    if(it.y > canvas.height + 20){
-      items.splice(i, 1);
-    }
+    if(it.y > canvas.height + 20) items.splice(i, 1);
   }
 }
 
 function collectItem(it){
-  if(it.type === 'life'){
-    lives = Math.min(lives + 1, maxLives);
-    toast('+1 생명!');
-  } else if(it.type === 'coin'){
-    coins += 20;
-    earned += 20;
-    toast('+20 코인!');
-  } else if(it.type === 'power'){
-    balls.forEach(function(b){ b.dmg += 1; });
-    toast('데미지 UP!');
-  }
+  if(it.type === 'life'){ lives = Math.min(lives + 1, maxLives); toast('+1 생명!'); }
+  else if(it.type === 'coin'){ coins += 20; earned += 20; toast('+20 코인!'); }
+  else if(it.type === 'power'){ balls.forEach(function(b){ b.dmg += 1; }); toast('데미지 UP!'); }
   updateUI();
 }
 
@@ -775,10 +747,7 @@ function updateFx(){
   }
   for(var i = particles.length - 1; i >= 0; i--){
     var p = particles[i];
-    p.x += p.dx;
-    p.y += p.dy;
-    p.dy += 0.2;
-    p.life--;
+    p.x += p.dx; p.y += p.dy; p.dy += 0.2; p.life--;
     if(p.life <= 0) particles.splice(i, 1);
   }
 }
@@ -798,38 +767,26 @@ function useSkill(n){
   skillCD[n-1] = now;
   
   if(n === 1){
-    // 관통
     var dur = skill.duration + lv * skill.durationUp;
-    balls.forEach(function(b){
-      b.piercing = true;
-      b.pierceTime = dur;
-    });
+    balls.forEach(function(b){ b.piercing = true; b.pierceTime = dur; });
     toast('관통!');
   } else if(n === 2){
-    // 번개
     var hits = skill.hits + lv * skill.hitsUp;
     for(var i = 0; i < hits && bricks.length > 0; i++){
       var idx = Math.floor(Math.random() * bricks.length);
-      var br = bricks[idx];
-      hitBrick(br, idx, 999);
+      hitBrick(bricks[idx], idx, 999);
     }
     toast('번개!');
   } else if(n === 3){
-    // 폭탄
     var radius = skill.radius + lv * skill.radiusUp;
-    var cx = canvas.width/2;
-    var cy = canvas.height/3;
+    var cx = canvas.width/2, cy = canvas.height/3;
     fx.push({x:cx, y:cy, r:0, max:radius});
     for(var i = bricks.length - 1; i >= 0; i--){
       var br = bricks[i];
-      var dist = Math.hypot(br.x + br.w/2 - cx, br.y + br.h/2 - cy);
-      if(dist < radius){
-        hitBrick(br, i, 999);
-      }
+      if(Math.hypot(br.x + br.w/2 - cx, br.y + br.h/2 - cy) < radius) hitBrick(br, i, 999);
     }
     toast('폭탄!');
   } else if(n === 4){
-    // 쿨타임 리셋
     skillCD = [0,0,0,0];
     toast('쿨타임 초기화!');
   }
@@ -839,7 +796,6 @@ function updateSkillCD(){
   var now = Date.now();
   var cdReduce = 1 - (getLv('s4') * 0.1);
   var cd = CFG.BASE_CD * cdReduce;
-  
   for(var i = 0; i < 4; i++){
     var el = document.getElementById('cd' + (i+1));
     var elapsed = now - skillCD[i];
@@ -849,11 +805,9 @@ function updateSkillCD(){
 
 // ========== 렌더링 ==========
 function render(){
-  // 배경
   ctx.fillStyle = '#08080f';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // 그리드
   ctx.strokeStyle = 'rgba(0,240,255,0.03)';
   for(var x = 0; x < canvas.width; x += 30){
     ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
@@ -864,24 +818,18 @@ function render(){
   
   if(state !== 'playing' && state !== 'paused') return;
   
-  // 폭발
   fx.forEach(function(e){
     var g = ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,e.r);
     g.addColorStop(0,'rgba(255,100,0,0.6)');
     g.addColorStop(1,'rgba(255,0,0,0)');
     ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill();
   });
   
-  // 벽돌
   bricks.forEach(function(br){
     var pct = br.hp / br.maxHp;
     ctx.fillStyle = 'hsl('+br.hue+',60%,'+(30+pct*30)+'%)';
     ctx.fillRect(br.x, br.y, br.w, br.h);
-    
-    // 금
     if(pct < 1){
       ctx.strokeStyle = 'rgba(0,0,0,0.5)';
       ctx.lineWidth = 1;
@@ -892,20 +840,15 @@ function render(){
         ctx.stroke();
       }
     }
-    
-    // HP 표시
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 10px Orbitron';
     ctx.textAlign = 'center';
     ctx.fillText(br.hp, br.x + br.w/2, br.y + br.h/2 + 4);
   });
   
-  // 아이템
   items.forEach(function(it){
     ctx.fillStyle = it.color;
-    ctx.beginPath();
-    ctx.arc(it.x, it.y, 12, 0, Math.PI*2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(it.x, it.y, 12, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#000';
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
@@ -913,43 +856,30 @@ function render(){
     ctx.fillText(it.icon, it.x, it.y);
   });
   
-  // 총알
   bullets.forEach(function(b){
     ctx.fillStyle = b.type === 'laser' ? '#f0f' : b.type === 'missile' ? '#f60' : '#0ff';
-    if(b.w){
-      ctx.fillRect(b.x - b.w/2, b.y - b.h/2, b.w, b.h);
-    } else {
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, 4, 0, Math.PI*2);
-      ctx.fill();
-    }
+    if(b.w) ctx.fillRect(b.x - b.w/2, b.y - b.h/2, b.w, b.h);
+    else { ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, Math.PI*2); ctx.fill(); }
   });
   
-  // 공
   balls.forEach(function(b){
     ctx.fillStyle = b.piercing ? '#f80' : '#fff';
     ctx.shadowBlur = 10;
     ctx.shadowColor = b.piercing ? '#f80' : '#0ff';
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
   });
   
-  // 패들
   ctx.fillStyle = '#0ff';
   ctx.shadowBlur = 15;
   ctx.shadowColor = '#0ff';
   ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
   ctx.shadowBlur = 0;
   
-  // 파티클
   particles.forEach(function(p){
     ctx.globalAlpha = p.life / 15;
     ctx.fillStyle = 'hsl('+p.hue+',70%,60%)';
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
   });
   ctx.globalAlpha = 1;
 }
@@ -1015,48 +945,52 @@ function stageClear(){
   var reward = 50 + stage * 20;
   coins += reward;
   earned += reward;
+  
+  var currentStage = stage;
+  var currentRound = round;
+  
+  // 스토리 텍스트 가져오기
+  var stageData = getStageData();
+  var roundData = getRoundData();
+  document.getElementById('storyText').textContent = stageData.text || '';
+  document.getElementById('stageClearTitle').textContent = (roundData.name || '라운드 ' + round) + ' - 스테이지 ' + stage;
   document.getElementById('stageReward').textContent = reward;
-  saveData();
-  updateUI();
   
-  // 서버에서 이미지 로드
-  loadStageMedia(round, stage);
+  // 이미지 로드
+  loadStageMedia(currentRound, currentStage);
   
-  if(stage >= CFG.STAGES){
-    // 라운드 클리어
+  // 다음 스테이지 계산
+  if(stage >= getMaxStages()){
     round++;
     stage = 1;
-    // 캐릭터 해금
     if(round <= CHARACTERS.length){
       CHARACTERS[round-1].unlocked = true;
     }
-    saveData();
+  } else {
+    stage++;
   }
   
+  saveData();
+  updateUI();
   document.getElementById('stageClearScreen').classList.remove('hidden');
 }
 
 function loadStageMedia(r, s){
-  var container = document.getElementById('stageMediaContainer');
-  if(!container) return;
-  
+  var bg = document.getElementById('stageClearBg');
   var key = 'r' + r + '_s' + s;
   var baseUrl = SUPABASE_URL + '/storage/v1/object/public/secret/' + key;
   
-  // jpg 먼저 시도
   var img = new Image();
   img.onload = function(){
-    container.innerHTML = '<img src="' + baseUrl + '.jpg" style="max-width:100%;max-height:200px;border-radius:12px;">';
+    bg.innerHTML = '<img src="' + baseUrl + '.jpg">';
   };
   img.onerror = function(){
-    // png 시도
     var img2 = new Image();
     img2.onload = function(){
-      container.innerHTML = '<img src="' + baseUrl + '.png" style="max-width:100%;max-height:200px;border-radius:12px;">';
+      bg.innerHTML = '<img src="' + baseUrl + '.png">';
     };
     img2.onerror = function(){
-      // mp4 시도
-      container.innerHTML = '<video src="' + baseUrl + '.mp4" style="max-width:100%;max-height:200px;border-radius:12px;" autoplay loop muted playsinline onerror="this.style.display=\'none\'"></video>';
+      bg.innerHTML = '<video src="' + baseUrl + '.mp4" autoplay loop muted playsinline></video>';
     };
     img2.src = baseUrl + '.png';
   };
@@ -1065,7 +999,6 @@ function loadStageMedia(r, s){
 
 function nextStage(){
   hideAll();
-  stage++;
   initGame();
   state = 'playing';
 }
@@ -1088,11 +1021,8 @@ function showShop(from){
 
 function closeShop(){
   hideAll();
-  if(returnTo === 'pause'){
-    document.getElementById('pauseScreen').classList.remove('hidden');
-  } else {
-    showStart();
-  }
+  if(returnTo === 'pause') document.getElementById('pauseScreen').classList.remove('hidden');
+  else showStart();
 }
 
 // ========== 입력 ==========
@@ -1127,7 +1057,6 @@ function setupInput(){
     if(e.key === ' ' || e.key === 'z') input.fire = false;
   };
   
-  // 스킬 버튼
   for(var i = 1; i <= 4; i++){
     (function(n){
       document.getElementById('skill' + n).onclick = function(){ useSkill(n); };
@@ -1140,8 +1069,8 @@ function setupButtons(){
   document.getElementById('shopBtn').onclick = function(){ showShop('menu'); };
   document.getElementById('playBtn').onclick = startGame;
   document.getElementById('backBtn').onclick = showStart;
-  
   document.getElementById('closeShopBtn').onclick = closeShop;
+  
   document.querySelectorAll('.shop-tab').forEach(function(tab){
     tab.onclick = function(){
       document.querySelectorAll('.shop-tab').forEach(function(t){ t.classList.remove('active'); });
@@ -1157,17 +1086,12 @@ function setupButtons(){
       document.getElementById('pauseScreen').classList.remove('hidden');
     }
   };
-  document.getElementById('resumeBtn').onclick = function(){
-    hideAll();
-    state = 'playing';
-  };
+  document.getElementById('resumeBtn').onclick = function(){ hideAll(); state = 'playing'; };
   document.getElementById('pauseShopBtn').onclick = function(){ showShop('pause'); };
   document.getElementById('restartBtn').onclick = function(){ hideAll(); startGame(); };
   document.getElementById('menuBtn').onclick = showStart;
-  
   document.getElementById('retryBtn').onclick = function(){ hideAll(); startGame(); };
   document.getElementById('gameOverMenuBtn').onclick = showStart;
-  
   document.getElementById('nextStageBtn').onclick = nextStage;
 }
 </script>
