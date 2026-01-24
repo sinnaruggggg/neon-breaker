@@ -171,15 +171,6 @@
 <script>
 // Supabase 설정
 var SUPABASE_URL = 'https://ealukkcyetnoouslojaa.supabase.co';
-var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhbHVra2N5ZXRub291c2xvamFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5ODkwNjAsImV4cCI6MjA4NDU2NTA2MH0.SQ77IL13Da3FczDKEtEcHwkQCRDKCA1-RaTBjQ5SvE0';
-
-function getThumbUrl(charId){
-  return SUPABASE_URL + '/storage/v1/object/public/thumbs/char_' + charId + '.jpg';
-}
-
-function getStageUrl(r, s, ext){
-  return SUPABASE_URL + '/storage/v1/object/public/secret/r' + r + '_s' + s + '.' + ext;
-}
 
 // ========== 게임 설정 ==========
 var CFG = {
@@ -995,8 +986,8 @@ function renderCharGrid(){
   CHARACTERS.forEach(function(c){
     var div = document.createElement('div');
     div.className = 'char-card' + (c.unlocked ? '' : ' locked') + (selectedChar === c.id ? ' selected' : '');
-    var thumbUrl = getThumbUrl(c.id);
-    div.innerHTML = '<div class="thumb"><img src="' + thumbUrl + '" onerror="this.style.display=\'none\'"></div><div class="char-name">'+(c.unlocked ? c.name : '🔒')+'</div>';
+    var thumbUrl = SUPABASE_URL + '/storage/v1/object/public/thumbs/char_' + c.id + '.jpg';
+    div.innerHTML = '<div class="thumb"><img src="' + thumbUrl + '" onerror="this.onerror=null;this.src=\'' + SUPABASE_URL + '/storage/v1/object/public/thumbs/char_' + c.id + '.png\'"></div><div class="char-name">'+(c.unlocked ? c.name : '🔒')+'</div>';
     if(c.unlocked){
       div.onclick = function(){
         selectedChar = c.id;
@@ -1049,26 +1040,27 @@ function loadStageMedia(r, s){
   var container = document.getElementById('stageMediaContainer');
   if(!container) return;
   
-  // Supabase Storage에서 이미지 로드
-  var jpgUrl = getStageUrl(r, s, 'jpg');
-  var pngUrl = getStageUrl(r, s, 'png');
-  var mp4Url = getStageUrl(r, s, 'mp4');
+  var key = 'r' + r + '_s' + s;
+  var baseUrl = SUPABASE_URL + '/storage/v1/object/public/secret/' + key;
   
+  // jpg 먼저 시도
   var img = new Image();
   img.onload = function(){
-    container.innerHTML = '<img src="' + jpgUrl + '" style="max-width:100%;max-height:200px;border-radius:12px;">';
+    container.innerHTML = '<img src="' + baseUrl + '.jpg" style="max-width:100%;max-height:200px;border-radius:12px;">';
   };
   img.onerror = function(){
+    // png 시도
     var img2 = new Image();
     img2.onload = function(){
-      container.innerHTML = '<img src="' + pngUrl + '" style="max-width:100%;max-height:200px;border-radius:12px;">';
+      container.innerHTML = '<img src="' + baseUrl + '.png" style="max-width:100%;max-height:200px;border-radius:12px;">';
     };
     img2.onerror = function(){
-      container.innerHTML = '<video src="' + mp4Url + '" style="max-width:100%;max-height:200px;border-radius:12px;" autoplay loop muted playsinline onerror="this.style.display=\'none\'"></video>';
+      // mp4 시도
+      container.innerHTML = '<video src="' + baseUrl + '.mp4" style="max-width:100%;max-height:200px;border-radius:12px;" autoplay loop muted playsinline onerror="this.style.display=\'none\'"></video>';
     };
-    img2.src = pngUrl;
+    img2.src = baseUrl + '.png';
   };
-  img.src = jpgUrl;
+  img.src = baseUrl + '.jpg';
 }
 
 function nextStage(){

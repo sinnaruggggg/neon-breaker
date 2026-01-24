@@ -13,6 +13,9 @@
     .container{max-width:800px;margin:0 auto}
     h1{font-family:'Orbitron';font-size:22px;text-align:center;margin-bottom:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .subtitle{text-align:center;color:var(--text-dim);margin-bottom:20px;font-size:12px}
+    .status-bar{padding:10px;background:#0a0a12;border-radius:8px;margin-bottom:15px;font-size:11px;display:flex;align-items:center;gap:10px}
+    .status-dot{width:10px;height:10px;border-radius:50%;background:var(--danger)}
+    .status-dot.ok{background:var(--success)}
     .tabs{display:flex;gap:5px;margin-bottom:15px;flex-wrap:wrap;justify-content:center}
     .tab{padding:10px 18px;background:var(--card);border:2px solid #2a2a40;border-radius:8px;font-family:'Orbitron';font-size:10px;color:var(--text-dim);cursor:pointer}
     .tab:hover{border-color:var(--primary)}
@@ -30,7 +33,6 @@
     .upload-card .label{font-family:'Orbitron';font-size:9px;color:var(--text-dim);margin-bottom:6px}
     .upload-card input[type="file"]{display:none}
     .upload-card .upload-btn{width:100%;padding:6px;background:var(--primary);border:none;border-radius:6px;font-family:'Orbitron';font-size:9px;color:#000;cursor:pointer}
-    .upload-card .upload-btn:hover{filter:brightness(1.1)}
     .upload-card .delete-btn{position:absolute;top:4px;right:4px;width:20px;height:20px;background:var(--danger);border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:none}
     .upload-card:hover .delete-btn{display:block}
     .round-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
@@ -49,68 +51,58 @@
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);padding:10px 20px;background:rgba(0,0,0,0.95);border:1px solid var(--success);border-radius:20px;font-family:'Orbitron';font-size:10px;color:var(--success);opacity:0;transition:all 0.3s;z-index:999}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .toast.error{border-color:var(--danger);color:var(--danger)}
-    .loading{display:inline-block;width:16px;height:16px;border:2px solid #333;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .status-bar{padding:10px;background:#0a0a12;border-radius:8px;margin-bottom:15px;font-size:11px;display:flex;align-items:center;gap:10px}
-    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--danger)}
-    .status-dot.connected{background:var(--success)}
   </style>
 </head>
 <body>
   <div class="container">
     <h1>⚙️ 네온 브레이커 관리자</h1>
-    <p class="subtitle">이미지/영상 업로드 및 게임 설정</p>
+    <p class="subtitle">Supabase Storage 연동</p>
     
     <div class="status-bar">
       <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">Supabase 연결 중...</span>
+      <span id="statusText">연결 중...</span>
     </div>
     
     <div class="tabs">
-      <button class="tab active" data-tab="thumbs">👤 캐릭터 썸네일</button>
-      <button class="tab" data-tab="stages">🎬 스테이지 이미지</button>
+      <button class="tab active" data-tab="thumbs">👤 썸네일</button>
+      <button class="tab" data-tab="stages">🎬 스테이지</button>
       <button class="tab" data-tab="data">💾 데이터</button>
     </div>
 
-    <!-- Thumbs Panel -->
     <div class="panel active" id="thumbsPanel">
       <div class="section">
-        <div class="section-title">👤 캐릭터 썸네일 (안전한 이미지)</div>
-        <p style="color:var(--text-dim);font-size:11px;margin-bottom:12px;">게임 시작 시 캐릭터 선택 화면에 표시됩니다.</p>
+        <div class="section-title">👤 캐릭터 썸네일</div>
         <div class="upload-grid" id="thumbsGrid"></div>
       </div>
     </div>
 
-    <!-- Stages Panel -->
     <div class="panel" id="stagesPanel">
       <div class="section">
-        <div class="section-title">🎬 스테이지 클리어 이미지 (secret 폴더)</div>
-        <p style="color:var(--text-dim);font-size:11px;margin-bottom:12px;">스테이지 클리어 시 표시됩니다. JPG, PNG, MP4 지원.</p>
+        <div class="section-title">🎬 스테이지 클리어 이미지</div>
         <div class="round-tabs" id="roundTabs"></div>
         <div class="upload-grid" id="stagesGrid"></div>
       </div>
     </div>
 
-    <!-- Data Panel -->
     <div class="panel" id="dataPanel">
       <div class="section">
         <div class="section-title">📊 게임 데이터</div>
         <div class="stats-grid" id="statsGrid"></div>
       </div>
       <div class="section">
-        <div class="section-title">💰 코인 관리</div>
+        <div class="section-title">💰 코인</div>
         <div class="row">
           <input type="number" class="input" id="coinInput" style="width:100px;">
-          <button class="btn btn-primary" id="setCoinsBtn">설정</button>
-          <button class="btn btn-ghost" id="add1kBtn">+1천</button>
-          <button class="btn btn-ghost" id="add10kBtn">+1만</button>
+          <button class="btn btn-primary" onclick="setCoins()">설정</button>
+          <button class="btn btn-ghost" onclick="addCoins(1000)">+1천</button>
+          <button class="btn btn-ghost" onclick="addCoins(10000)">+1만</button>
         </div>
       </div>
       <div class="section">
         <div class="section-title">⚠️ 위험</div>
         <div class="row">
-          <button class="btn btn-primary" id="unlockAllBtn">🔓 전체 해금</button>
-          <button class="btn btn-danger" id="resetBtn">🗑️ 초기화</button>
+          <button class="btn btn-primary" onclick="unlockAll()">🔓 전체 해금</button>
+          <button class="btn btn-danger" onclick="resetData()">🗑️ 초기화</button>
         </div>
       </div>
     </div>
@@ -119,23 +111,16 @@
   <div class="toast" id="toast"></div>
 
 <script>
-// Supabase 설정
 var SUPABASE_URL = 'https://ealukkcyetnoouslojaa.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhbHVra2N5ZXRub291c2xvamFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5ODkwNjAsImV4cCI6MjA4NDU2NTA2MH0.SQ77IL13Da3FczDKEtEcHwkQCRDKCA1-RaTBjQ5SvE0';
 
-var supabase;
+var sb;
 var currentRound = 1;
-var maxRounds = 6;
-var stagesPerRound = 7;
-var maxChars = 6;
 
-// 초기화
 window.onload = async function(){
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   await checkConnection();
   setupTabs();
-  setupEvents();
   renderThumbs();
   renderRoundTabs();
   renderStages();
@@ -144,26 +129,12 @@ window.onload = async function(){
 
 async function checkConnection(){
   try {
-    var { data, error } = await supabase.storage.listBuckets();
+    var { data, error } = await sb.storage.from('thumbs').list();
     if(error) throw error;
-    
-    // thumbs 버킷 확인/생성
-    var thumbsBucket = data.find(b => b.name === 'thumbs');
-    if(!thumbsBucket){
-      await supabase.storage.createBucket('thumbs', { public: true });
-    }
-    
-    // secret 버킷 확인/생성
-    var secretBucket = data.find(b => b.name === 'secret');
-    if(!secretBucket){
-      await supabase.storage.createBucket('secret', { public: true });
-    }
-    
-    document.getElementById('statusDot').classList.add('connected');
-    document.getElementById('statusText').textContent = 'Supabase 연결됨';
+    document.getElementById('statusDot').classList.add('ok');
+    document.getElementById('statusText').textContent = 'Supabase 연결됨 ✓';
   } catch(e) {
-    document.getElementById('statusText').textContent = 'Supabase 연결 실패: ' + e.message;
-    toast('Supabase 연결 실패!', true);
+    document.getElementById('statusText').textContent = '연결 실패: ' + e.message;
   }
 }
 
@@ -178,247 +149,175 @@ function setupTabs(){
   });
 }
 
-function setupEvents(){
-  document.getElementById('setCoinsBtn').onclick = function(){
-    var coins = parseInt(document.getElementById('coinInput').value) || 0;
-    localStorage.setItem('nb_coins', coins);
-    renderStats();
-    toast('코인 설정됨!');
-  };
-  document.getElementById('add1kBtn').onclick = function(){
-    var coins = (parseInt(localStorage.getItem('nb_coins')) || 0) + 1000;
-    localStorage.setItem('nb_coins', coins);
-    document.getElementById('coinInput').value = coins;
-    renderStats();
-    toast('+1,000!');
-  };
-  document.getElementById('add10kBtn').onclick = function(){
-    var coins = (parseInt(localStorage.getItem('nb_coins')) || 0) + 10000;
-    localStorage.setItem('nb_coins', coins);
-    document.getElementById('coinInput').value = coins;
-    renderStats();
-    toast('+10,000!');
-  };
-  document.getElementById('unlockAllBtn').onclick = function(){
-    var chars = [];
-    for(var i = 1; i <= maxChars; i++) chars.push(i);
-    localStorage.setItem('nb_unlocked_chars', JSON.stringify(chars));
-    toast('전체 해금!');
-  };
-  document.getElementById('resetBtn').onclick = function(){
-    if(confirm('모든 데이터 초기화?')){
-      localStorage.clear();
-      location.reload();
-    }
-  };
-}
-
-// 캐릭터 썸네일
+// ===== 썸네일 =====
 async function renderThumbs(){
   var grid = document.getElementById('thumbsGrid');
   var html = '';
-  
-  for(var i = 1; i <= maxChars; i++){
-    html += '<div class="upload-card" data-char="' + i + '">';
-    html += '<div class="preview" id="thumbPreview' + i + '"><span class="placeholder">👤</span></div>';
+  for(var i = 1; i <= 6; i++){
+    html += '<div class="upload-card" id="thumbCard' + i + '">';
+    html += '<div class="preview" id="thumbPrev' + i + '"><span class="placeholder">👤</span></div>';
     html += '<div class="label">캐릭터 ' + i + '</div>';
-    html += '<input type="file" accept="image/*" id="thumbInput' + i + '">';
+    html += '<input type="file" accept="image/*" id="thumbInput' + i + '" onchange="uploadThumb(' + i + ')">';
     html += '<button class="upload-btn" onclick="document.getElementById(\'thumbInput' + i + '\').click()">📷 업로드</button>';
     html += '</div>';
   }
   grid.innerHTML = html;
   
-  // 기존 이미지 로드
-  for(var i = 1; i <= maxChars; i++){
-    loadThumb(i);
-    setupThumbInput(i);
+  for(var i = 1; i <= 6; i++) loadThumb(i);
+}
+
+async function loadThumb(id){
+  var { data } = await sb.storage.from('thumbs').list();
+  var file = data.find(f => f.name.startsWith('char_' + id));
+  if(file){
+    var { data: urlData } = sb.storage.from('thumbs').getPublicUrl(file.name);
+    var prev = document.getElementById('thumbPrev' + id);
+    prev.innerHTML = '<img src="' + urlData.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteThumb(' + id + ',\'' + file.name + '\')">✕</button>';
+    document.getElementById('thumbCard' + id).classList.add('has-image');
   }
 }
 
-async function loadThumb(charId){
-  var preview = document.getElementById('thumbPreview' + charId);
-  var card = preview.parentElement;
+async function uploadThumb(id){
+  var input = document.getElementById('thumbInput' + id);
+  var file = input.files[0];
+  if(!file) return;
   
-  var { data } = supabase.storage.from('thumbs').getPublicUrl('char_' + charId + '.jpg');
+  toast('업로드 중...');
   
-  var img = new Image();
-  img.onload = function(){
-    preview.innerHTML = '<img src="' + data.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteThumb(' + charId + ')">✕</button>';
-    card.classList.add('has-image');
-  };
-  img.onerror = function(){
-    // png 시도
-    var { data: data2 } = supabase.storage.from('thumbs').getPublicUrl('char_' + charId + '.png');
-    var img2 = new Image();
-    img2.onload = function(){
-      preview.innerHTML = '<img src="' + data2.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteThumb(' + charId + ')">✕</button>';
-      card.classList.add('has-image');
-    };
-    img2.src = data2.publicUrl;
-  };
-  img.src = data.publicUrl;
+  // 기존 삭제
+  var { data: list } = await sb.storage.from('thumbs').list();
+  var old = list.filter(f => f.name.startsWith('char_' + id));
+  if(old.length) await sb.storage.from('thumbs').remove(old.map(f => f.name));
+  
+  var ext = file.name.split('.').pop();
+  var { error } = await sb.storage.from('thumbs').upload('char_' + id + '.' + ext, file);
+  
+  if(error) toast('실패: ' + error.message, true);
+  else { toast('완료!'); loadThumb(id); }
 }
 
-function setupThumbInput(charId){
-  document.getElementById('thumbInput' + charId).onchange = async function(e){
-    var file = e.target.files[0];
-    if(!file) return;
-    
-    var ext = file.name.split('.').pop().toLowerCase();
-    var fileName = 'char_' + charId + '.' + ext;
-    
-    toast('업로드 중...');
-    
-    // 기존 파일 삭제
-    await supabase.storage.from('thumbs').remove(['char_' + charId + '.jpg', 'char_' + charId + '.png']);
-    
-    var { error } = await supabase.storage.from('thumbs').upload(fileName, file, { upsert: true });
-    
-    if(error){
-      toast('업로드 실패: ' + error.message, true);
-    } else {
-      toast('업로드 완료!');
-      loadThumb(charId);
-    }
-  };
+async function deleteThumb(id, name){
+  await sb.storage.from('thumbs').remove([name]);
+  document.getElementById('thumbPrev' + id).innerHTML = '<span class="placeholder">👤</span>';
+  document.getElementById('thumbCard' + id).classList.remove('has-image');
+  toast('삭제됨');
 }
 
-async function deleteThumb(charId){
-  if(!confirm('삭제하시겠습니까?')) return;
-  
-  await supabase.storage.from('thumbs').remove(['char_' + charId + '.jpg', 'char_' + charId + '.png']);
-  
-  var preview = document.getElementById('thumbPreview' + charId);
-  preview.innerHTML = '<span class="placeholder">👤</span>';
-  preview.parentElement.classList.remove('has-image');
-  toast('삭제됨!');
-}
-
-// 스테이지 이미지
+// ===== 스테이지 =====
 function renderRoundTabs(){
-  var tabs = document.getElementById('roundTabs');
   var html = '';
-  for(var r = 1; r <= maxRounds; r++){
-    html += '<button class="round-tab' + (r === currentRound ? ' active' : '') + '" data-round="' + r + '">라운드 ' + r + '</button>';
+  for(var r = 1; r <= 6; r++){
+    html += '<button class="round-tab' + (r===currentRound?' active':'') + '" onclick="selectRound(' + r + ')">R' + r + '</button>';
   }
-  tabs.innerHTML = html;
-  
-  tabs.querySelectorAll('.round-tab').forEach(function(tab){
-    tab.onclick = function(){
-      currentRound = parseInt(tab.dataset.round);
-      tabs.querySelectorAll('.round-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      renderStages();
-    };
-  });
+  document.getElementById('roundTabs').innerHTML = html;
+}
+
+function selectRound(r){
+  currentRound = r;
+  renderRoundTabs();
+  renderStages();
 }
 
 async function renderStages(){
   var grid = document.getElementById('stagesGrid');
   var html = '';
-  
-  for(var s = 1; s <= stagesPerRound; s++){
+  for(var s = 1; s <= 7; s++){
     var key = 'r' + currentRound + '_s' + s;
-    html += '<div class="upload-card" data-key="' + key + '">';
-    html += '<div class="preview" id="stagePreview_' + key + '"><span class="placeholder">🎬</span></div>';
+    html += '<div class="upload-card" id="stageCard_' + key + '">';
+    html += '<div class="preview" id="stagePrev_' + key + '"><span class="placeholder">🎬</span></div>';
     html += '<div class="label">스테이지 ' + s + '</div>';
-    html += '<input type="file" accept="image/*,video/*" id="stageInput_' + key + '">';
+    html += '<input type="file" accept="image/*,video/*" id="stageInput_' + key + '" onchange="uploadStage(\'' + key + '\')">';
     html += '<button class="upload-btn" onclick="document.getElementById(\'stageInput_' + key + '\').click()">📷 업로드</button>';
     html += '</div>';
   }
   grid.innerHTML = html;
   
-  // 기존 이미지 로드
-  for(var s = 1; s <= stagesPerRound; s++){
-    var key = 'r' + currentRound + '_s' + s;
-    loadStage(key);
-    setupStageInput(key);
-  }
+  for(var s = 1; s <= 7; s++) loadStage('r' + currentRound + '_s' + s);
 }
 
 async function loadStage(key){
-  var preview = document.getElementById('stagePreview_' + key);
-  var card = preview.parentElement;
-  
-  // jpg, png, mp4 순서로 시도
-  var exts = ['jpg', 'png', 'mp4'];
-  
-  for(var ext of exts){
-    var { data } = supabase.storage.from('secret').getPublicUrl(key + '.' + ext);
-    
-    if(ext === 'mp4'){
-      // 비디오 체크는 별도로
-      var video = document.createElement('video');
-      video.onloadeddata = function(){
-        preview.innerHTML = '<video src="' + data.publicUrl + '?' + Date.now() + '" autoplay muted loop></video><button class="delete-btn" onclick="deleteStage(\'' + key + '\')">✕</button>';
-        card.classList.add('has-image');
-      };
-      video.src = data.publicUrl;
+  var { data } = await sb.storage.from('secret').list();
+  var file = data.find(f => f.name.startsWith(key));
+  if(file){
+    var { data: urlData } = sb.storage.from('secret').getPublicUrl(file.name);
+    var prev = document.getElementById('stagePrev_' + key);
+    var isVideo = file.name.endsWith('.mp4') || file.name.endsWith('.webm');
+    if(isVideo){
+      prev.innerHTML = '<video src="' + urlData.publicUrl + '?' + Date.now() + '" autoplay muted loop></video><button class="delete-btn" onclick="deleteStage(\'' + key + '\',\'' + file.name + '\')">✕</button>';
     } else {
-      var img = new Image();
-      img.onload = (function(url, k){
-        return function(){
-          document.getElementById('stagePreview_' + k).innerHTML = '<img src="' + url + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteStage(\'' + k + '\')">✕</button>';
-          document.getElementById('stagePreview_' + k).parentElement.classList.add('has-image');
-        };
-      })(data.publicUrl, key);
-      img.src = data.publicUrl;
+      prev.innerHTML = '<img src="' + urlData.publicUrl + '?' + Date.now() + '"><button class="delete-btn" onclick="deleteStage(\'' + key + '\',\'' + file.name + '\')">✕</button>';
     }
+    document.getElementById('stageCard_' + key).classList.add('has-image');
   }
 }
 
-function setupStageInput(key){
-  document.getElementById('stageInput_' + key).onchange = async function(e){
-    var file = e.target.files[0];
-    if(!file) return;
-    
-    var ext = file.name.split('.').pop().toLowerCase();
-    var fileName = key + '.' + ext;
-    
-    toast('업로드 중...');
-    
-    // 기존 파일 삭제
-    await supabase.storage.from('secret').remove([key + '.jpg', key + '.png', key + '.mp4']);
-    
-    var { error } = await supabase.storage.from('secret').upload(fileName, file, { upsert: true });
-    
-    if(error){
-      toast('업로드 실패: ' + error.message, true);
-    } else {
-      toast('업로드 완료!');
-      loadStage(key);
-    }
-  };
+async function uploadStage(key){
+  var input = document.getElementById('stageInput_' + key);
+  var file = input.files[0];
+  if(!file) return;
+  
+  toast('업로드 중...');
+  
+  var { data: list } = await sb.storage.from('secret').list();
+  var old = list.filter(f => f.name.startsWith(key));
+  if(old.length) await sb.storage.from('secret').remove(old.map(f => f.name));
+  
+  var ext = file.name.split('.').pop();
+  var { error } = await sb.storage.from('secret').upload(key + '.' + ext, file);
+  
+  if(error) toast('실패: ' + error.message, true);
+  else { toast('완료!'); loadStage(key); }
 }
 
-async function deleteStage(key){
-  if(!confirm('삭제하시겠습니까?')) return;
-  
-  await supabase.storage.from('secret').remove([key + '.jpg', key + '.png', key + '.mp4']);
-  
-  var preview = document.getElementById('stagePreview_' + key);
-  preview.innerHTML = '<span class="placeholder">🎬</span>';
-  preview.parentElement.classList.remove('has-image');
-  toast('삭제됨!');
+async function deleteStage(key, name){
+  await sb.storage.from('secret').remove([name]);
+  document.getElementById('stagePrev_' + key).innerHTML = '<span class="placeholder">🎬</span>';
+  document.getElementById('stageCard_' + key).classList.remove('has-image');
+  toast('삭제됨');
 }
 
+// ===== 데이터 =====
 function renderStats(){
   var coins = parseInt(localStorage.getItem('nb_coins')) || 0;
   var round = parseInt(localStorage.getItem('nb_round')) || 1;
-  var unlocked = JSON.parse(localStorage.getItem('nb_unlocked_chars')) || [1];
-  
   document.getElementById('coinInput').value = coins;
   document.getElementById('statsGrid').innerHTML = 
     '<div class="stat-card"><div class="value">' + coins.toLocaleString() + '</div><div class="label">코인</div></div>' +
-    '<div class="stat-card"><div class="value">' + round + '</div><div class="label">라운드</div></div>' +
-    '<div class="stat-card"><div class="value">' + unlocked.length + '/' + maxChars + '</div><div class="label">캐릭터</div></div>';
+    '<div class="stat-card"><div class="value">' + round + '</div><div class="label">라운드</div></div>';
 }
 
-function toast(msg, isError){
+function setCoins(){
+  var v = parseInt(document.getElementById('coinInput').value) || 0;
+  localStorage.setItem('nb_coins', v);
+  renderStats();
+  toast('설정됨!');
+}
+
+function addCoins(n){
+  var v = (parseInt(localStorage.getItem('nb_coins')) || 0) + n;
+  localStorage.setItem('nb_coins', v);
+  document.getElementById('coinInput').value = v;
+  renderStats();
+  toast('+' + n.toLocaleString());
+}
+
+function unlockAll(){
+  var up = {w1:10,w2:10,w3:10,w4:10,s1:5,s2:5,s3:5,s4:5,p_width:10,p_magnet:5,p_catch:5,p_speed:10,p_multi:3,b_dmg:10,b_speed:5,b_size:5};
+  localStorage.setItem('nb_upgrades', JSON.stringify(up));
+  localStorage.setItem('nb_coins', 99999);
+  renderStats();
+  toast('전체 해금!');
+}
+
+function resetData(){
+  if(confirm('초기화?')){ localStorage.clear(); location.reload(); }
+}
+
+function toast(msg, err){
   var t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast show' + (isError ? ' error' : '');
-  setTimeout(function(){ t.className = 'toast'; }, 2500);
+  t.className = 'toast show' + (err ? ' error' : '');
+  setTimeout(function(){ t.className = 'toast'; }, 2000);
 }
 </script>
 </body>
